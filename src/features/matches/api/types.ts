@@ -1,4 +1,55 @@
-// Match 타입 (경기)
+// ============================================
+// 시리즈/게임 타입 (새 구조)
+// ============================================
+
+// MatchSeries 타입 (시리즈)
+export interface MatchSeries {
+  id: string;
+  series_date: string;
+  series_type: 'bo1' | 'bo3' | 'bo5';
+  series_status: 'scheduled' | 'ongoing' | 'completed';
+  winner_team?: 'blue' | 'red';
+  blue_wins: number;
+  red_wins: number;
+  screenshot_url?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Game 타입 (시리즈 내 개별 게임)
+export interface Game {
+  id: string;
+  match_series_id: string;
+  game_number: number;
+  game_status: 'not_started' | 'in_progress' | 'completed';
+  winning_team?: 'blue' | 'red';
+  duration?: number; // 초 단위
+  screenshot_url?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// BanPick 타입 (게임별 밴픽)
+export interface BanPick {
+  id: string;
+  game_id: string;
+  team: 'blue' | 'red';
+  phase: 'ban' | 'pick';
+  order_number: number;
+  champion_name: string;
+  position?: 'top' | 'jungle' | 'mid' | 'adc' | 'support';
+  selected_by_member_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================
+// 역호환성 타입 (기존 Match)
+// ============================================
+
+// Match 타입 (경기) - 역호환성 유지
 export interface Match {
   id: string;
   match_date: string;
@@ -13,7 +64,7 @@ export interface Match {
 // GameResult 타입 (개인 경기 결과)
 export interface GameResult {
   id: string;
-  match_id: string;
+  game_id: string; // match_id에서 game_id로 변경
   member_id: string;
 
   // 기본 정보
@@ -66,6 +117,58 @@ export interface GameResult {
   updated_at: string;
 }
 
+// ============================================
+// DTO 타입 (시리즈/게임)
+// ============================================
+
+// 시리즈 생성 DTO
+export interface CreateMatchSeriesDto {
+  series_date: string; // ISO 8601 형식
+  series_type: 'bo1' | 'bo3' | 'bo5';
+  notes?: string;
+}
+
+// 시리즈 수정 DTO
+export interface UpdateMatchSeriesDto {
+  series_date?: string;
+  series_status?: 'scheduled' | 'ongoing' | 'completed';
+  winner_team?: 'blue' | 'red';
+  blue_wins?: number;
+  red_wins?: number;
+  screenshot_url?: string;
+  notes?: string;
+}
+
+// 게임 생성 DTO
+export interface CreateGameDto {
+  match_series_id: string;
+  game_number: number;
+}
+
+// 게임 수정 DTO
+export interface UpdateGameDto {
+  game_status?: 'not_started' | 'in_progress' | 'completed';
+  winning_team?: 'blue' | 'red';
+  duration?: number;
+  screenshot_url?: string;
+  notes?: string;
+}
+
+// 밴픽 생성 DTO
+export interface CreateBanPickDto {
+  game_id: string;
+  team: 'blue' | 'red';
+  phase: 'ban' | 'pick';
+  order_number: number;
+  champion_name: string;
+  position?: 'top' | 'jungle' | 'mid' | 'adc' | 'support';
+  selected_by_member_id?: string;
+}
+
+// ============================================
+// 역호환성 DTO (기존 Match)
+// ============================================
+
 // 경기 생성 DTO
 export interface CreateMatchDto {
   match_date: string; // ISO 8601 형식
@@ -86,7 +189,7 @@ export interface UpdateMatchDto {
 
 // 개인 경기 결과 생성 DTO
 export interface CreateGameResultDto {
-  match_id: string;
+  game_id?: string; // 선택적 (URL 파라미터로 전달될 수도 있음)
   member_id: string;
   team: 'blue' | 'red';
   position: 'top' | 'jungle' | 'mid' | 'adc' | 'support';
@@ -145,6 +248,75 @@ export interface UpdateGameResultDto {
   turret_kills?: number;
   inhibitor_kills?: number;
 }
+
+// ============================================
+// API 응답 타입 (시리즈/게임)
+// ============================================
+
+// 시리즈 응답
+export interface MatchSeriesResponse {
+  success: boolean;
+  data?: MatchSeries;
+  error?: string;
+}
+
+export interface MatchSeriesListResponse {
+  success: boolean;
+  data?: MatchSeries[];
+  error?: string;
+}
+
+// 게임 응답
+export interface GameResponse {
+  success: boolean;
+  data?: Game;
+  error?: string;
+}
+
+export interface GameListResponse {
+  success: boolean;
+  data?: Game[];
+  error?: string;
+}
+
+// 밴픽 응답
+export interface BanPickResponse {
+  success: boolean;
+  data?: BanPick;
+  error?: string;
+}
+
+export interface BanPickListResponse {
+  success: boolean;
+  data?: BanPick[];
+  error?: string;
+}
+
+// 상세 조회 타입
+export interface GameDetail extends Game {
+  game_results: GameResult[];
+  ban_picks: BanPick[];
+}
+
+export interface MatchSeriesDetail extends MatchSeries {
+  games: GameDetail[];
+}
+
+export interface MatchSeriesDetailResponse {
+  success: boolean;
+  data?: MatchSeriesDetail;
+  error?: string;
+}
+
+export interface GameDetailResponse {
+  success: boolean;
+  data?: GameDetail;
+  error?: string;
+}
+
+// ============================================
+// 역호환성 API 응답 타입
+// ============================================
 
 // API 응답 타입
 export interface MatchesResponse {
