@@ -1,27 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { verifyAuth } from '../api/adminAuthApi';
 
 export function useAdminAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  async function checkAuth() {
-    try {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['admin-auth'],
+    queryFn: async () => {
       const result = await verifyAuth();
-      setIsAuthenticated(result.authenticated);
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      setIsAuthenticated(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }
+      return result.authenticated;
+    },
+    retry: false,
+  });
 
-  return { isAuthenticated, isLoading, refetch: checkAuth };
+  return {
+    isAuthenticated: data ?? false,
+    isLoading,
+    refetch,
+  };
 }

@@ -9,11 +9,11 @@ import { useAdminLogin } from '../hooks/useAdminLogin';
 
 export function LoginForm() {
   const [password, setPassword] = useState('');
-  const { handleLogin, isLoading, error } = useAdminLogin();
+  const loginMutation = useAdminLogin();
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    handleLogin(password);
+    loginMutation.mutate(password);
   }
 
   return (
@@ -23,7 +23,7 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
-          {error && <ErrorMessage message={error} />}
+          {loginMutation.error && <ErrorMessage message={loginMutation.error.message} />}
 
           <Input
             type="password"
@@ -31,12 +31,12 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="관리자 비밀번호를 입력하세요"
-            disabled={isLoading}
+            disabled={loginMutation.isPending}
             autoFocus
           />
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? '로그인 중...' : '로그인'}
+          <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+            {loginMutation.isPending ? '로그인 중...' : '로그인'}
           </Button>
         </form>
       </CardContent>

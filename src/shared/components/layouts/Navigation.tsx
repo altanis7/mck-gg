@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAdminAuth } from "@/features/admin/hooks/useAdminAuth";
-import { logout } from "@/features/admin/api/adminAuthApi";
+import { useAdminLogout } from "@/features/admin/hooks/useAdminLogout";
 import { Button } from "@/shared/components/ui/Button";
 
 const publicNavItems = [
@@ -15,21 +15,20 @@ const publicNavItems = [
 
 const adminNavItems = [
   { href: "/admin/members", label: "멤버 관리" },
-  { href: "/admin/matches/new", label: "경기 등록" },
+  { href: "/admin/matches", label: "경기 관리" },
 ];
 
 export function Navigation() {
   const pathname = usePathname();
-  const { isAuthenticated, refetch } = useAdminAuth();
+  const { isAuthenticated } = useAdminAuth();
+  const logoutMutation = useAdminLogout();
 
   const navItems = isAuthenticated
     ? [...publicNavItems, ...adminNavItems]
     : publicNavItems;
 
   async function handleLogout() {
-    await logout();
-    refetch();
-    window.location.href = '/';
+    await logoutMutation.mutateAsync();
   }
 
   return (
