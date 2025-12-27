@@ -14,19 +14,18 @@ import { ErrorMessage } from '@/shared/components/ui/ErrorMessage';
 import { Modal } from '@/shared/components/ui/Modal';
 
 export function MemberList() {
-  const { members, isLoading, error, refetch } = useMembers();
-  const { create, isLoading: isCreating } = useCreateMember();
-  const { update, isLoading: isUpdating } = useUpdateMember();
-  const { remove, isLoading: isDeleting } = useDeleteMember();
+  const { data: members, isLoading, error } = useMembers();
+  const createMutation = useCreateMember();
+  const updateMutation = useUpdateMember();
+  const deleteMutation = useDeleteMember();
 
   const [showForm, setShowForm] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
 
   async function handleCreate(data: CreateMemberDto) {
     try {
-      await create(data);
+      await createMutation.mutateAsync(data);
       setShowForm(false);
-      refetch();
     } catch (err) {
       // 에러는 Hook에서 처리
     }
@@ -36,9 +35,8 @@ export function MemberList() {
     if (!editingMember) return;
 
     try {
-      await update(editingMember.id, data);
+      await updateMutation.mutateAsync({ id: editingMember.id, data });
       setEditingMember(null);
-      refetch();
     } catch (err) {
       // 에러는 Hook에서 처리
     }
@@ -48,8 +46,7 @@ export function MemberList() {
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
     try {
-      await remove(id);
-      refetch();
+      await deleteMutation.mutateAsync(id);
     } catch (err) {
       // 에러는 Hook에서 처리
     }
@@ -75,7 +72,7 @@ export function MemberList() {
   }
 
   if (error) {
-    return <ErrorMessage message={error} className="my-8" />;
+    return <ErrorMessage message={error.message} className="my-8" />;
   }
 
   return (
@@ -85,14 +82,14 @@ export function MemberList() {
         <Button onClick={openCreateForm}>멤버 추가</Button>
       </div>
 
-      {members.length === 0 ? (
+      {members?.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           <p>등록된 멤버가 없습니다.</p>
           <p className="text-sm mt-2">멤버 추가 버튼을 눌러 멤버를 등록하세요.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {members.map((member) => (
+          {members?.map((member) => (
             <MemberCard
               key={member.id}
               member={member}
@@ -112,7 +109,7 @@ export function MemberList() {
           member={editingMember || undefined}
           onSubmit={editingMember ? handleUpdate : handleCreate}
           onCancel={closeForm}
-          isLoading={isCreating || isUpdating}
+          isLoading={createMutation.isPending || updateMutation.isPending}
         />
       </Modal>
     </div>

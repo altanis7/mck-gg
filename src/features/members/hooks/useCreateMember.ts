@@ -1,28 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createMember } from '../api/membersApi';
 import { CreateMemberDto } from '../api/types';
 
 export function useCreateMember() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  async function create(data: CreateMemberDto) {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const member = await createMember(data);
-      return member;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '멤버 생성에 실패했습니다.';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return { create, isLoading, error };
+  return useMutation({
+    mutationFn: async (data: CreateMemberDto) => {
+      const result = await createMember(data);
+      if (result.success && result.data) {
+        return result.data;
+      }
+      throw new Error(result.error || '멤버 생성 실패');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+    },
+  });
 }

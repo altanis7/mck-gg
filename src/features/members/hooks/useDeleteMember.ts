@@ -1,26 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteMember } from '../api/membersApi';
 
 export function useDeleteMember() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  async function remove(id: string) {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await deleteMember(id);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '멤버 삭제에 실패했습니다.';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return { remove, isLoading, error };
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const result = await deleteMember(id);
+      if (result.success) {
+        return;
+      }
+      throw new Error(result.error || '멤버 삭제 실패');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+    },
+  });
 }
