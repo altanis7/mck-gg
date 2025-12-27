@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/shared/components/layouts/Header";
 import { Navigation } from "@/shared/components/layouts/Navigation";
 import { Footer } from "@/shared/components/layouts/Footer";
+import { Providers } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,10 +45,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-gray-50`}
         suppressHydrationWarning
       >
-        <Header />
-        <Navigation />
-        <main className="flex-1 container mx-auto px-4 py-8">{children}</main>
-        <Footer />
+        <Providers>
+          <Header />
+          <Navigation />
+          <main className="flex-1 container mx-auto px-4 py-8">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
