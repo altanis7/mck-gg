@@ -39,8 +39,10 @@ export function RankingTable({ rankings }: RankingTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
+    <>
+      {/* 데스크톱 테이블 */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-900 text-gray-300 border-b border-gray-700">
             <th className="px-4 py-3 text-center text-xs font-semibold">
@@ -216,6 +218,64 @@ export function RankingTable({ rankings }: RankingTableProps) {
           })}
         </tbody>
       </table>
-    </div>
+      </div>
+
+      {/* 모바일 카드 리스트 */}
+      <div className="md:hidden bg-gray-800 divide-y divide-gray-700 rounded-lg overflow-hidden">
+        {rankings.map((member) => (
+            <div
+              key={member.id}
+              className="flex items-center gap-3 p-3 hover:bg-gray-750 transition-colors"
+            >
+              {/* 순위 */}
+              <div className="flex-shrink-0 w-8">
+                <span
+                  className={cn(
+                    "text-lg font-bold",
+                    member.ranking === 1 && "text-yellow-400",
+                    member.ranking === 2 && "text-gray-300",
+                    member.ranking === 3 && "text-amber-600",
+                    member.ranking > 3 && "text-white"
+                  )}
+                >
+                  {member.ranking}
+                </span>
+              </div>
+
+              {/* 플레이어 이름 */}
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-white truncate">
+                  {member.name}
+                </div>
+              </div>
+
+              {/* 티어 아이콘 */}
+              <div className="flex-shrink-0">
+                <TierBadge
+                  tierConfig={member.tierConfig}
+                  size="sm"
+                  showName={false}
+                />
+              </div>
+
+              {/* LP + 승률 + 게임수 */}
+              <div className="flex-shrink-0 text-right">
+                <div className="text-xs text-gray-400 mb-0.5">
+                  {member.current_elo} LP
+                </div>
+                <div
+                  className="text-sm font-semibold mb-0.5"
+                  style={{ color: getWinRateColor(member.win_rate) }}
+                >
+                  {member.win_rate.toFixed(1)}%
+                </div>
+                <div className="text-xs text-gray-400">
+                  {member.total_games}게임
+                </div>
+              </div>
+            </div>
+        ))}
+      </div>
+    </>
   );
 }

@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Header } from "@/shared/components/layouts/Header";
 import { Navigation } from "@/shared/components/layouts/Navigation";
 import { Footer } from "@/shared/components/layouts/Footer";
 import { Providers } from "./providers";
@@ -58,6 +57,12 @@ const pretendard = localFont({
   display: "swap",
 });
 
+const partialSans = localFont({
+  src: "../../public/fonts/PartialSansKR-Regular.otf",
+  variable: "--font-partial-sans",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "MCK.GG - 리그오브레전드 내전 기록",
   description: "MCK 리그오브레전드 내전 기록 및 통계",
@@ -84,11 +89,10 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body
-        className={`${pretendard.variable} font-pretendard antialiased min-h-screen flex flex-col bg-gray-50`}
+        className={`${pretendard.variable} ${partialSans.variable} font-pretendard antialiased min-h-screen flex flex-col bg-slate-950`}
         suppressHydrationWarning
       >
         <Providers>
-          <Header />
           <Navigation />
           <main className="flex-1 container mx-auto px-4 py-8">{children}</main>
           <Footer />

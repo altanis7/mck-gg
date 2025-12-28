@@ -15,8 +15,8 @@ export default function RatingsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">랭킹</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold text-white mb-2">랭킹</h1>
+        <p className="text-white">
           내전 참가자들의 실력 순위입니다. 게임 결과에 따라 실시간으로
           업데이트됩니다.
         </p>
@@ -25,7 +25,7 @@ export default function RatingsPage() {
       {isLoading && (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          <p className="mt-4 text-gray-600">랭킹 불러오는 중...</p>
+          <p className="mt-4 text-white">랭킹 불러오는 중...</p>
         </div>
       )}
 

@@ -2,6 +2,7 @@
 
 @theme inline {
   --font-sans: var(--font-pretendard);
+  --font-partial-sans: var(--font-partial-sans);
 }
 
 body {
