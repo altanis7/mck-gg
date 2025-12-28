@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useMatchSeriesDetail } from '@/features/matches/hooks/useMatchSeriesDetail';
 import { useDeleteGame } from '@/features/matches/hooks/useDeleteGame';
 import { useDeleteSeries } from '@/features/matches/hooks/useDeleteSeries';
+import { useCalculateRatings } from '@/features/ratings/hooks/useCalculateRatings';
 import { GameRegistrationForm } from '@/features/matches/components/GameRegistrationForm';
 import { DeleteGameModal } from '@/features/matches/components/DeleteGameModal';
 import { DeleteSeriesModal } from '@/features/matches/components/DeleteSeriesModal';
@@ -28,6 +29,7 @@ export default function MatchDetailPage({
   const [showDeleteSeriesModal, setShowDeleteSeriesModal] = useState(false);
   const deleteGameMutation = useDeleteGame(id);
   const deleteSeriesMutation = useDeleteSeries();
+  const calculateRatingsMutation = useCalculateRatings();
 
   const handleDeleteGame = async () => {
     if (!gameToDelete) return;
@@ -51,6 +53,18 @@ export default function MatchDetailPage({
     } catch (error) {
       console.error('시리즈 삭제 실패:', error);
       setShowDeleteSeriesModal(false);
+    }
+  };
+
+  const handleCalculateRatings = async () => {
+    if (!selectedGame) return;
+
+    try {
+      await calculateRatingsMutation.mutateAsync(selectedGame.id);
+      alert('ELO 계산이 완료되었습니다!');
+    } catch (error) {
+      console.error('ELO 계산 실패:', error);
+      alert('ELO 계산에 실패했습니다.');
     }
   };
 
@@ -201,6 +215,8 @@ export default function MatchDetailPage({
             <GameResultsDisplay
               game={selectedGame}
               onDeleteClick={() => setGameToDelete(selectedGame.id)}
+              onCalculateRatings={handleCalculateRatings}
+              isCalculating={calculateRatingsMutation.isPending}
             />
           )}
         </>
@@ -254,9 +270,13 @@ export default function MatchDetailPage({
 function GameResultsDisplay({
   game,
   onDeleteClick,
+  onCalculateRatings,
+  isCalculating,
 }: {
   game: GameDetail;
   onDeleteClick: () => void;
+  onCalculateRatings: () => void;
+  isCalculating: boolean;
 }) {
   const positionOrder: Record<string, number> = {
     top: 1,
@@ -278,6 +298,17 @@ function GameResultsDisplay({
   const calculateKDA = (kills: number, deaths: number, assists: number) => {
     if (deaths === 0) return ((kills + assists) / 1).toFixed(2);
     return ((kills + assists) / deaths).toFixed(2);
+  };
+
+  const getPositionShort = (position: string): string => {
+    const positionMap: Record<string, string> = {
+      'top': 'TOP',
+      'jungle': 'JUG',
+      'mid': 'MID',
+      'adc': 'ADC',
+      'support': 'SUP',
+    };
+    return positionMap[position.toLowerCase()] || position.toUpperCase();
   };
 
   // Helper functions for OP.GG style
@@ -319,9 +350,21 @@ function GameResultsDisplay({
               {game.game_number}게임
             </span>
           </div>
-          <Button variant="danger" size="sm" onClick={onDeleteClick}>
-            삭제
-          </Button>
+          <div className="flex gap-2">
+            {game.winning_team && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={onCalculateRatings}
+                disabled={isCalculating}
+              >
+                {isCalculating ? 'ELO 계산 중...' : 'ELO 계산'}
+              </Button>
+            )}
+            <Button variant="danger" size="sm" onClick={onDeleteClick}>
+              삭제
+            </Button>
+          </div>
         </div>
         {game.notes && (
           <p className="mt-3 text-sm text-gray-600 bg-gray-50 p-2 rounded">
@@ -376,62 +419,132 @@ function GameResultsDisplay({
             return (
               <div
                 key={result.id}
-                className="bg-white rounded-lg p-3 flex items-center gap-3 hover:shadow-md transition-shadow"
+                className="bg-white rounded-lg overflow-hidden hover:shadow-md transition-shadow"
               >
-                {/* 챔피언 아바타 */}
-                <ChampionAvatar
-                  championName={result.champion_name}
-                  size="lg"
-                  shape="circle"
-                  showTooltip
-                />
+                {/* 모바일 레이아웃 */}
+                <div className="md:hidden p-2">
+                  {/* 상단: 아바타 + 이름 + 포지션 */}
+                  <div className="flex items-center gap-2 mb-2">
+                    {/* 챔피언 아바타 (작게) */}
+                    <div className="relative">
+                      <ChampionAvatar
+                        championName={result.champion_name}
+                        size="sm"
+                        shape="circle"
+                        showTooltip
+                      />
+                    </div>
 
-                {/* 포지션 */}
-                <div className="w-12">
-                  <span className="text-xs font-semibold text-gray-600 uppercase">
-                    {result.position}
-                  </span>
-                </div>
+                    {/* 플레이어 정보 */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-semibold text-gray-500 uppercase">
+                          {getPositionShort(result.position)}
+                        </span>
+                      </div>
+                      <div className="font-semibold text-sm text-gray-900 truncate">
+                        {result.members?.name || '-'}
+                      </div>
+                    </div>
 
-                {/* 플레이어 정보 */}
-                <div className="w-32">
-                  <div className="font-semibold text-sm text-gray-900">
-                    {result.members?.name || '-'}
+                    {/* KDA 비율 배지 */}
+                    <div className="px-2 py-1 bg-gray-100 rounded text-xs font-bold text-gray-700">
+                      {kda}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {result.members?.summoner_name || ''}
+
+                  {/* 하단: 통계 */}
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-3">
+                      {/* KDA */}
+                      <div>
+                        <span className="font-bold text-gray-900">
+                          {result.kills}/{result.deaths}/{result.assists}
+                        </span>
+                      </div>
+
+                      {/* CS */}
+                      <div className="text-gray-600">
+                        CS <span className="font-semibold text-gray-900">{result.cs}</span> ({csPerMin})
+                      </div>
+                    </div>
+
+                    {/* 피해량 */}
+                    <div className="text-gray-600">
+                      <span className="font-semibold text-gray-900">
+                        {(result.champion_damage / 1000).toFixed(1)}k
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 피해량 진행바 */}
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-blue-400 to-blue-500 h-1.5 rounded-full transition-all"
+                        style={{ width: `${damagePercent}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* KDA */}
-                <div className="flex items-center gap-2 w-40">
-                  <span className="font-bold text-gray-900">
-                    {result.kills} / {result.deaths} / {result.assists}
-                  </span>
-                  <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-700">
-                    {kda}
-                  </span>
-                </div>
+                {/* 데스크톱 레이아웃 */}
+                <div className="hidden md:flex items-center gap-3 p-3">
+                  {/* 챔피언 아바타 */}
+                  <ChampionAvatar
+                    championName={result.champion_name}
+                    size="lg"
+                    shape="circle"
+                    showTooltip
+                  />
 
-                {/* CS */}
-                <div className="text-center w-24">
-                  <div className="font-semibold text-sm text-gray-900">{result.cs}</div>
-                  <div className="text-xs text-gray-500">{csPerMin} /분</div>
-                </div>
-
-                {/* 피해량 진행바 */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-gray-500">피해량</span>
-                    <span className="font-semibold text-gray-900">
-                      {result.champion_damage.toLocaleString()}
+                  {/* 포지션 */}
+                  <div className="w-12">
+                    <span className="text-xs font-semibold text-gray-600 uppercase">
+                      {getPositionShort(result.position)}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-blue-400 to-blue-500 h-2 rounded-full transition-all"
-                      style={{ width: `${damagePercent}%` }}
-                    />
+
+                  {/* 플레이어 정보 */}
+                  <div className="w-32">
+                    <div className="font-semibold text-sm text-gray-900">
+                      {result.members?.name || '-'}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {result.members?.summoner_name || ''}
+                    </div>
+                  </div>
+
+                  {/* KDA */}
+                  <div className="flex items-center gap-2 w-40">
+                    <span className="font-bold text-gray-900">
+                      {result.kills} / {result.deaths} / {result.assists}
+                    </span>
+                    <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-700">
+                      {kda}
+                    </span>
+                  </div>
+
+                  {/* CS */}
+                  <div className="text-center w-24">
+                    <div className="font-semibold text-sm text-gray-900">{result.cs}</div>
+                    <div className="text-xs text-gray-500">{csPerMin} /분</div>
+                  </div>
+
+                  {/* 피해량 진행바 */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-gray-500">피해량</span>
+                      <span className="font-semibold text-gray-900">
+                        {result.champion_damage.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-blue-400 to-blue-500 h-2 rounded-full transition-all"
+                        style={{ width: `${damagePercent}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -453,62 +566,132 @@ function GameResultsDisplay({
             return (
               <div
                 key={result.id}
-                className="bg-white rounded-lg p-3 flex items-center gap-3 hover:shadow-md transition-shadow"
+                className="bg-white rounded-lg overflow-hidden hover:shadow-md transition-shadow"
               >
-                {/* 챔피언 아바타 */}
-                <ChampionAvatar
-                  championName={result.champion_name}
-                  size="lg"
-                  shape="circle"
-                  showTooltip
-                />
+                {/* 모바일 레이아웃 */}
+                <div className="md:hidden p-2">
+                  {/* 상단: 아바타 + 이름 + 포지션 */}
+                  <div className="flex items-center gap-2 mb-2">
+                    {/* 챔피언 아바타 (작게) */}
+                    <div className="relative">
+                      <ChampionAvatar
+                        championName={result.champion_name}
+                        size="sm"
+                        shape="circle"
+                        showTooltip
+                      />
+                    </div>
 
-                {/* 포지션 */}
-                <div className="w-12">
-                  <span className="text-xs font-semibold text-gray-600 uppercase">
-                    {result.position}
-                  </span>
-                </div>
+                    {/* 플레이어 정보 */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-semibold text-gray-500 uppercase">
+                          {getPositionShort(result.position)}
+                        </span>
+                      </div>
+                      <div className="font-semibold text-sm text-gray-900 truncate">
+                        {result.members?.name || '-'}
+                      </div>
+                    </div>
 
-                {/* 플레이어 정보 */}
-                <div className="w-32">
-                  <div className="font-semibold text-sm text-gray-900">
-                    {result.members?.name || '-'}
+                    {/* KDA 비율 배지 */}
+                    <div className="px-2 py-1 bg-gray-100 rounded text-xs font-bold text-gray-700">
+                      {kda}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {result.members?.summoner_name || ''}
+
+                  {/* 하단: 통계 */}
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-3">
+                      {/* KDA */}
+                      <div>
+                        <span className="font-bold text-gray-900">
+                          {result.kills}/{result.deaths}/{result.assists}
+                        </span>
+                      </div>
+
+                      {/* CS */}
+                      <div className="text-gray-600">
+                        CS <span className="font-semibold text-gray-900">{result.cs}</span> ({csPerMin})
+                      </div>
+                    </div>
+
+                    {/* 피해량 */}
+                    <div className="text-gray-600">
+                      <span className="font-semibold text-gray-900">
+                        {(result.champion_damage / 1000).toFixed(1)}k
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 피해량 진행바 */}
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-red-400 to-red-500 h-1.5 rounded-full transition-all"
+                        style={{ width: `${damagePercent}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* KDA */}
-                <div className="flex items-center gap-2 w-40">
-                  <span className="font-bold text-gray-900">
-                    {result.kills} / {result.deaths} / {result.assists}
-                  </span>
-                  <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-700">
-                    {kda}
-                  </span>
-                </div>
+                {/* 데스크톱 레이아웃 */}
+                <div className="hidden md:flex items-center gap-3 p-3">
+                  {/* 챔피언 아바타 */}
+                  <ChampionAvatar
+                    championName={result.champion_name}
+                    size="lg"
+                    shape="circle"
+                    showTooltip
+                  />
 
-                {/* CS */}
-                <div className="text-center w-24">
-                  <div className="font-semibold text-sm text-gray-900">{result.cs}</div>
-                  <div className="text-xs text-gray-500">{csPerMin} /분</div>
-                </div>
-
-                {/* 피해량 진행바 */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-gray-500">피해량</span>
-                    <span className="font-semibold text-gray-900">
-                      {result.champion_damage.toLocaleString()}
+                  {/* 포지션 */}
+                  <div className="w-12">
+                    <span className="text-xs font-semibold text-gray-600 uppercase">
+                      {getPositionShort(result.position)}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-red-400 to-red-500 h-2 rounded-full transition-all"
-                      style={{ width: `${damagePercent}%` }}
-                    />
+
+                  {/* 플레이어 정보 */}
+                  <div className="w-32">
+                    <div className="font-semibold text-sm text-gray-900">
+                      {result.members?.name || '-'}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {result.members?.summoner_name || ''}
+                    </div>
+                  </div>
+
+                  {/* KDA */}
+                  <div className="flex items-center gap-2 w-40">
+                    <span className="font-bold text-gray-900">
+                      {result.kills} / {result.deaths} / {result.assists}
+                    </span>
+                    <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-700">
+                      {kda}
+                    </span>
+                  </div>
+
+                  {/* CS */}
+                  <div className="text-center w-24">
+                    <div className="font-semibold text-sm text-gray-900">{result.cs}</div>
+                    <div className="text-xs text-gray-500">{csPerMin} /분</div>
+                  </div>
+
+                  {/* 피해량 진행바 */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-gray-500">피해량</span>
+                      <span className="font-semibold text-gray-900">
+                        {result.champion_damage.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-red-400 to-red-500 h-2 rounded-full transition-all"
+                        style={{ width: `${damagePercent}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
