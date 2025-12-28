@@ -72,6 +72,12 @@ export interface GameResult {
   position: 'top' | 'jungle' | 'mid' | 'adc' | 'support';
   champion_name: string;
 
+  // 조인된 멤버 정보 (선택적)
+  members?: {
+    name: string;
+    summoner_name: string;
+  };
+
   // KDA 통계
   kills: number;
   deaths: number;

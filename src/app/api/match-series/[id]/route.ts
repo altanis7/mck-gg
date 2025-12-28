@@ -55,7 +55,10 @@ export async function GET(
         // game_results 조회
         const { data: gameResults } = await supabaseAdmin
           .from('game_results')
-          .select('*')
+          .select(`
+            *,
+            members!game_results_member_id_fkey(name, summoner_name)
+          `)
           .eq('game_id', game.id)
           .order('team', { ascending: true })
           .order('position', { ascending: true });
