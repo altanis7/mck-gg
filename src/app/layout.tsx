@@ -89,7 +89,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body
-        className={`${pretendard.variable} ${partialSans.variable} font-pretendard antialiased min-h-screen flex flex-col bg-slate-950`}
+        className={`${pretendard.variable} ${partialSans.variable} font-pretendard antialiased min-h-screen flex flex-col bg-slate-950 text-white`}
         suppressHydrationWarning
       >
         <Providers>

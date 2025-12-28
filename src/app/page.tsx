@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { Button } from "@/shared/components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/Card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/Card";
 
 export default function Home() {
   return (
@@ -20,9 +25,7 @@ export default function Home() {
             <CardTitle>경기 기록</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600 mb-4">
-              내전 경기 기록을 확인하세요
-            </p>
+            <p className="text-gray-600 mb-4">내전 경기 기록을 확인하세요</p>
             <Link href="/matches">
               <Button variant="outline" className="w-full">
                 경기 보기
@@ -36,9 +39,7 @@ export default function Home() {
             <CardTitle>통계</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600 mb-4">
-              개인 및 전체 통계를 확인하세요
-            </p>
+            <p className="text-gray-600 mb-4">개인 및 전체 통계를 확인하세요</p>
             <Link href="/stats">
               <Button variant="outline" className="w-full">
                 통계 보기
@@ -52,9 +53,7 @@ export default function Home() {
             <CardTitle>관리자</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600 mb-4">
-              멤버 관리 및 경기 등록
-            </p>
+            <p className="text-gray-600 mb-4">멤버 관리 및 경기 등록</p>
             <Link href="/admin/login">
               <Button variant="outline" className="w-full">
                 관리자 로그인

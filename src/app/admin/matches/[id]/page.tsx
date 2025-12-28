@@ -112,11 +112,11 @@ export default function MatchDetailPage({
       </div>
 
       {/* 시리즈 정보 */}
-      <div className="bg-white p-6 rounded-lg shadow mb-6">
+      <div className="bg-slate-800/50 border border-slate-700 backdrop-blur-sm p-6 rounded-lg shadow mb-6">
         <div className="flex justify-between items-start mb-4">
           <div>
             <h1 className="text-3xl font-bold mb-2">시리즈 상세</h1>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               {new Date(seriesDetail.series_date).toLocaleString('ko-KR')}
             </p>
             <p className="text-lg font-semibold mt-2">{seriesTypeLabel}</p>
@@ -128,7 +128,7 @@ export default function MatchDetailPage({
                   ? 'bg-green-100 text-green-700'
                   : seriesDetail.series_status === 'ongoing'
                     ? 'bg-yellow-100 text-yellow-700'
-                    : 'bg-gray-100 text-gray-700'
+                    : 'bg-gray-100 text-gray-200'
               }`}
             >
               {statusLabel}
@@ -156,7 +156,7 @@ export default function MatchDetailPage({
           </div>
         </div>
         {seriesDetail.notes && (
-          <p className="mt-4 p-4 bg-gray-50 rounded">{seriesDetail.notes}</p>
+          <p className="mt-4 p-4 bg-slate-900/50 rounded">{seriesDetail.notes}</p>
         )}
       </div>
 
@@ -198,7 +198,7 @@ export default function MatchDetailPage({
                 className={`px-4 py-2 rounded font-semibold transition-colors ${
                   selectedGameIndex === index
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    : 'bg-gray-200 text-gray-200 hover:bg-gray-300'
                 }`}
               >
                 {game.game_number}게임
@@ -237,7 +237,7 @@ export default function MatchDetailPage({
       )}
 
       {seriesDetail.games.length === 0 && !isAddingGame && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
+        <div className="text-center py-12 bg-slate-900/50 rounded-lg">
           <p className="text-gray-500 mb-4">등록된 게임이 없습니다</p>
           <p className="text-sm text-gray-400">
             위의 "게임 추가" 버튼을 클릭하여 첫 게임을 등록하세요
@@ -327,7 +327,7 @@ function GameResultsDisplay({
   return (
     <div className="space-y-4">
       {/* 게임 정보 헤더 - OP.GG 스타일 */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div className="bg-slate-800/50 border border-slate-700 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 p-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             {game.winning_team && (
@@ -342,7 +342,7 @@ function GameResultsDisplay({
               </div>
             )}
             {game.duration && (
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-300">
                 {Math.floor(game.duration / 60)}분 {game.duration % 60}초
               </span>
             )}
@@ -367,7 +367,7 @@ function GameResultsDisplay({
           </div>
         </div>
         {game.notes && (
-          <p className="mt-3 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+          <p className="mt-3 text-sm text-gray-300 bg-slate-900/50 p-2 rounded">
             {game.notes}
           </p>
         )}
@@ -375,7 +375,7 @@ function GameResultsDisplay({
 
       {/* 밴픽 정보 - OP.GG 스타일 */}
       {game.ban_picks && game.ban_picks.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="bg-slate-800/50 border border-slate-700 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center justify-between gap-8">
             {/* 블루팀 밴 */}
             <div className="flex items-center gap-3">
@@ -419,7 +419,7 @@ function GameResultsDisplay({
             return (
               <div
                 key={result.id}
-                className="bg-white rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-slate-800/50 border border-slate-700 backdrop-blur-sm rounded-lg overflow-hidden hover:shadow-md transition-shadow"
               >
                 {/* 모바일 레이아웃 */}
                 <div className="md:hidden p-2">
@@ -442,13 +442,13 @@ function GameResultsDisplay({
                           {getPositionShort(result.position)}
                         </span>
                       </div>
-                      <div className="font-semibold text-sm text-gray-900 truncate">
+                      <div className="font-semibold text-sm text-white truncate">
                         {result.members?.name || '-'}
                       </div>
                     </div>
 
                     {/* KDA 비율 배지 */}
-                    <div className="px-2 py-1 bg-gray-100 rounded text-xs font-bold text-gray-700">
+                    <div className="px-2 py-1 bg-gray-100 rounded text-xs font-bold text-gray-200">
                       {kda}
                     </div>
                   </div>
@@ -458,20 +458,20 @@ function GameResultsDisplay({
                     <div className="flex items-center gap-3">
                       {/* KDA */}
                       <div>
-                        <span className="font-bold text-gray-900">
+                        <span className="font-bold text-white">
                           {result.kills}/{result.deaths}/{result.assists}
                         </span>
                       </div>
 
                       {/* CS */}
-                      <div className="text-gray-600">
-                        CS <span className="font-semibold text-gray-900">{result.cs}</span> ({csPerMin})
+                      <div className="text-gray-300">
+                        CS <span className="font-semibold text-white">{result.cs}</span> ({csPerMin})
                       </div>
                     </div>
 
                     {/* 피해량 */}
-                    <div className="text-gray-600">
-                      <span className="font-semibold text-gray-900">
+                    <div className="text-gray-300">
+                      <span className="font-semibold text-white">
                         {(result.champion_damage / 1000).toFixed(1)}k
                       </span>
                     </div>
@@ -500,14 +500,14 @@ function GameResultsDisplay({
 
                   {/* 포지션 */}
                   <div className="w-12">
-                    <span className="text-xs font-semibold text-gray-600 uppercase">
+                    <span className="text-xs font-semibold text-gray-300 uppercase">
                       {getPositionShort(result.position)}
                     </span>
                   </div>
 
                   {/* 플레이어 정보 */}
                   <div className="w-32">
-                    <div className="font-semibold text-sm text-gray-900">
+                    <div className="font-semibold text-sm text-white">
                       {result.members?.name || '-'}
                     </div>
                     <div className="text-xs text-gray-500">
@@ -517,17 +517,17 @@ function GameResultsDisplay({
 
                   {/* KDA */}
                   <div className="flex items-center gap-2 w-40">
-                    <span className="font-bold text-gray-900">
+                    <span className="font-bold text-white">
                       {result.kills} / {result.deaths} / {result.assists}
                     </span>
-                    <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-700">
+                    <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-200">
                       {kda}
                     </span>
                   </div>
 
                   {/* CS */}
                   <div className="text-center w-24">
-                    <div className="font-semibold text-sm text-gray-900">{result.cs}</div>
+                    <div className="font-semibold text-sm text-white">{result.cs}</div>
                     <div className="text-xs text-gray-500">{csPerMin} /분</div>
                   </div>
 
@@ -535,7 +535,7 @@ function GameResultsDisplay({
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between text-xs mb-1">
                       <span className="text-gray-500">피해량</span>
-                      <span className="font-semibold text-gray-900">
+                      <span className="font-semibold text-white">
                         {result.champion_damage.toLocaleString()}
                       </span>
                     </div>
@@ -566,7 +566,7 @@ function GameResultsDisplay({
             return (
               <div
                 key={result.id}
-                className="bg-white rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-slate-800/50 border border-slate-700 backdrop-blur-sm rounded-lg overflow-hidden hover:shadow-md transition-shadow"
               >
                 {/* 모바일 레이아웃 */}
                 <div className="md:hidden p-2">
@@ -589,13 +589,13 @@ function GameResultsDisplay({
                           {getPositionShort(result.position)}
                         </span>
                       </div>
-                      <div className="font-semibold text-sm text-gray-900 truncate">
+                      <div className="font-semibold text-sm text-white truncate">
                         {result.members?.name || '-'}
                       </div>
                     </div>
 
                     {/* KDA 비율 배지 */}
-                    <div className="px-2 py-1 bg-gray-100 rounded text-xs font-bold text-gray-700">
+                    <div className="px-2 py-1 bg-gray-100 rounded text-xs font-bold text-gray-200">
                       {kda}
                     </div>
                   </div>
@@ -605,20 +605,20 @@ function GameResultsDisplay({
                     <div className="flex items-center gap-3">
                       {/* KDA */}
                       <div>
-                        <span className="font-bold text-gray-900">
+                        <span className="font-bold text-white">
                           {result.kills}/{result.deaths}/{result.assists}
                         </span>
                       </div>
 
                       {/* CS */}
-                      <div className="text-gray-600">
-                        CS <span className="font-semibold text-gray-900">{result.cs}</span> ({csPerMin})
+                      <div className="text-gray-300">
+                        CS <span className="font-semibold text-white">{result.cs}</span> ({csPerMin})
                       </div>
                     </div>
 
                     {/* 피해량 */}
-                    <div className="text-gray-600">
-                      <span className="font-semibold text-gray-900">
+                    <div className="text-gray-300">
+                      <span className="font-semibold text-white">
                         {(result.champion_damage / 1000).toFixed(1)}k
                       </span>
                     </div>
@@ -647,14 +647,14 @@ function GameResultsDisplay({
 
                   {/* 포지션 */}
                   <div className="w-12">
-                    <span className="text-xs font-semibold text-gray-600 uppercase">
+                    <span className="text-xs font-semibold text-gray-300 uppercase">
                       {getPositionShort(result.position)}
                     </span>
                   </div>
 
                   {/* 플레이어 정보 */}
                   <div className="w-32">
-                    <div className="font-semibold text-sm text-gray-900">
+                    <div className="font-semibold text-sm text-white">
                       {result.members?.name || '-'}
                     </div>
                     <div className="text-xs text-gray-500">
@@ -664,17 +664,17 @@ function GameResultsDisplay({
 
                   {/* KDA */}
                   <div className="flex items-center gap-2 w-40">
-                    <span className="font-bold text-gray-900">
+                    <span className="font-bold text-white">
                       {result.kills} / {result.deaths} / {result.assists}
                     </span>
-                    <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-700">
+                    <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-200">
                       {kda}
                     </span>
                   </div>
 
                   {/* CS */}
                   <div className="text-center w-24">
-                    <div className="font-semibold text-sm text-gray-900">{result.cs}</div>
+                    <div className="font-semibold text-sm text-white">{result.cs}</div>
                     <div className="text-xs text-gray-500">{csPerMin} /분</div>
                   </div>
 
@@ -682,7 +682,7 @@ function GameResultsDisplay({
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between text-xs mb-1">
                       <span className="text-gray-500">피해량</span>
-                      <span className="font-semibold text-gray-900">
+                      <span className="font-semibold text-white">
                         {result.champion_damage.toLocaleString()}
                       </span>
                     </div>

@@ -196,8 +196,8 @@ export function MatchRegistrationForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* 경기 기본 정보 */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">경기 정보</h2>
+      <div className="bg-slate-800/50 border border-slate-700 p-6 rounded-lg shadow backdrop-blur-sm">
+        <h2 className="text-xl font-bold mb-4 text-white">경기 정보</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
             label="경기 날짜"
@@ -236,12 +236,12 @@ export function MatchRegistrationForm() {
       </div>
 
       {/* 블루팀 */}
-      <div className="bg-blue-50 p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4 text-blue-700">블루팀</h2>
+      <div className="bg-blue-950/30 border border-slate-700 p-6 rounded-lg shadow backdrop-blur-sm">
+        <h2 className="text-xl font-bold mb-4 text-blue-400">블루팀</h2>
         <div className="space-y-4">
           {POSITIONS.map((position, index) => (
-            <div key={position} className="bg-white p-4 rounded">
-              <h3 className="font-semibold mb-3 capitalize">{position}</h3>
+            <div key={position} className="bg-slate-800/50 border border-slate-700 p-4 rounded">
+              <h3 className="font-semibold mb-3 capitalize text-white">{position}</h3>
               <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
                 <Select
                   label="선수"
@@ -288,12 +288,12 @@ export function MatchRegistrationForm() {
       </div>
 
       {/* 레드팀 */}
-      <div className="bg-red-50 p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4 text-red-700">레드팀</h2>
+      <div className="bg-red-950/30 border border-slate-700 p-6 rounded-lg shadow backdrop-blur-sm">
+        <h2 className="text-xl font-bold mb-4 text-red-400">레드팀</h2>
         <div className="space-y-4">
           {POSITIONS.map((position, index) => (
-            <div key={position} className="bg-white p-4 rounded">
-              <h3 className="font-semibold mb-3 capitalize">{position}</h3>
+            <div key={position} className="bg-slate-800/50 border border-slate-700 p-4 rounded">
+              <h3 className="font-semibold mb-3 capitalize text-white">{position}</h3>
               <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
                 <Select
                   label="선수"

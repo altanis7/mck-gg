@@ -36,7 +36,7 @@ export default function RatingsPage() {
       )}
 
       {rankings && (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="bg-slate-800/50 border border-slate-700 rounded-lg shadow-md backdrop-blur-sm overflow-hidden">
           <RankingTable rankings={rankings} />
         </div>
       )}

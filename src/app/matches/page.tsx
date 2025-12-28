@@ -55,12 +55,12 @@ export default function MatchesPage() {
               <Link
                 key={item.id}
                 href={`/matches/${item.id}`}
-                className="block bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                className="block bg-slate-800/50 rounded-lg shadow-sm border border-slate-700 backdrop-blur-sm p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-lg font-semibold text-gray-900">
+                      <span className="text-lg font-semibold text-white">
                         {new Date(item.series_date).toLocaleDateString(
                           "ko-KR",
                           {
@@ -70,7 +70,7 @@ export default function MatchesPage() {
                           }
                         )}
                       </span>
-                      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
+                      <span className="px-2 py-1 bg-slate-700/50 text-gray-200 text-sm font-medium rounded">
                         {seriesTypeLabel}
                       </span>
                       <span
@@ -79,7 +79,7 @@ export default function MatchesPage() {
                             ? "bg-green-100 text-green-700"
                             : item.series_status === "ongoing"
                             ? "bg-yellow-100 text-yellow-700"
-                            : "bg-gray-100 text-gray-700"
+                            : "bg-slate-700/50 text-gray-200"
                         }`}
                       >
                         {statusLabel}
@@ -88,7 +88,7 @@ export default function MatchesPage() {
 
                     {item.series_status === "completed" && item.winner_team && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">결과:</span>
+                        <span className="text-sm text-gray-300">결과:</span>
                         <span
                           className={`text-sm font-bold ${
                             item.winner_team === "blue"

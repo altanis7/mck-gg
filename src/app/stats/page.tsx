@@ -156,7 +156,7 @@ export default function StatsPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">플레이어 랭킹</h1>
-        <p className="text-gray-600">
+        <p className="text-gray-300">
           최소 3경기 이상 플레이한 선수만 표시됩니다
         </p>
       </div>
@@ -170,7 +170,7 @@ export default function StatsPage() {
             className={`px-4 py-2 rounded font-semibold transition-colors ${
               sortBy === option.key
                 ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                : "bg-gray-200 text-gray-200 hover:bg-gray-300"
             }`}
           >
             {option.label}
@@ -185,34 +185,34 @@ export default function StatsPage() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-slate-800/50 rounded-lg shadow-sm border border-slate-700 backdrop-blur-sm overflow-hidden">
           {/* 데스크톱 테이블 */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-slate-900/50 border-b border-slate-700">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase">
                     순위
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase">
                     플레이어
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-300 uppercase">
                     경기 수
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-300 uppercase">
                     승률
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-300 uppercase">
                     KDA
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-300 uppercase">
                     평균 K/D/A
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-300 uppercase">
                     평균 피해량
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-300 uppercase">
                     평균 CS
                   </th>
                 </tr>
@@ -229,7 +229,7 @@ export default function StatsPage() {
                             ? "text-gray-400 text-lg"
                             : index === 2
                             ? "text-orange-600 text-lg"
-                            : "text-gray-600"
+                            : "text-gray-300"
                         }`}
                       >
                         {index + 1}
@@ -237,7 +237,7 @@ export default function StatsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div>
-                        <div className="font-semibold text-gray-900">
+                        <div className="font-semibold text-white">
                           {stat.memberName}
                         </div>
                         <div className="text-xs text-gray-500">
@@ -245,11 +245,11 @@ export default function StatsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-center text-gray-900">
+                    <td className="px-4 py-3 text-center text-white">
                       {stat.gamesPlayed}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className="font-semibold text-gray-900">
+                      <span className="font-semibold text-white">
                         {stat.winRate.toFixed(1)}%
                       </span>
                       <div className="text-xs text-gray-500">
@@ -257,20 +257,20 @@ export default function StatsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className="font-bold text-gray-900">
+                      <span className="font-bold text-white">
                         {stat.kda.toFixed(2)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-700">
+                    <td className="px-4 py-3 text-center text-sm text-gray-200">
                       {stat.avgKills.toFixed(1)} / {stat.avgDeaths.toFixed(1)} /{" "}
                       {stat.avgAssists.toFixed(1)}
                     </td>
-                    <td className="px-4 py-3 text-center font-semibold text-gray-900">
+                    <td className="px-4 py-3 text-center font-semibold text-white">
                       {stat.avgDamage.toLocaleString("ko-KR", {
                         maximumFractionDigits: 0,
                       })}
                     </td>
-                    <td className="px-4 py-3 text-center font-semibold text-gray-900">
+                    <td className="px-4 py-3 text-center font-semibold text-white">
                       {stat.avgCS.toFixed(1)}
                     </td>
                   </tr>
@@ -292,13 +292,13 @@ export default function StatsPage() {
                         ? "text-gray-400"
                         : index === 2
                         ? "text-orange-600"
-                        : "text-gray-600"
+                        : "text-gray-300"
                     }`}
                   >
                     {index + 1}
                   </span>
                   <div className="flex-1">
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-white">
                       {stat.memberName}
                     </div>
                     <div className="text-xs text-gray-500">
@@ -306,7 +306,7 @@ export default function StatsPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-semibold text-gray-900">
+                    <div className="text-sm font-semibold text-white">
                       {stat.winRate.toFixed(1)}%
                     </div>
                     <div className="text-xs text-gray-500">
@@ -318,20 +318,20 @@ export default function StatsPage() {
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div className="text-center">
                     <div className="text-gray-500">KDA</div>
-                    <div className="font-bold text-gray-900">
+                    <div className="font-bold text-white">
                       {stat.kda.toFixed(2)}
                     </div>
                   </div>
                   <div className="text-center">
                     <div className="text-gray-500">평균 K/D/A</div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-white">
                       {stat.avgKills.toFixed(1)}/{stat.avgDeaths.toFixed(1)}/
                       {stat.avgAssists.toFixed(1)}
                     </div>
                   </div>
                   <div className="text-center">
                     <div className="text-gray-500">피해량</div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-white">
                       {(stat.avgDamage / 1000).toFixed(1)}k
                     </div>
                   </div>
