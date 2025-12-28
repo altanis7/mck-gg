@@ -11,6 +11,8 @@ import { DeleteSeriesModal } from '@/features/matches/components/DeleteSeriesMod
 import { Button } from '@/shared/components/ui/Button';
 import { Loading } from '@/shared/components/ui/Loading';
 import { ErrorMessage } from '@/shared/components/ui/ErrorMessage';
+import { ChampionAvatar } from '@/shared/components/ui/ChampionAvatar';
+import { ChampionBanList } from '@/features/matches/components/ChampionBanList';
 import { GameDetail } from '@/features/matches/api/types';
 
 export default function MatchDetailPage({
@@ -278,184 +280,240 @@ function GameResultsDisplay({
     return ((kills + assists) / deaths).toFixed(2);
   };
 
+  // Helper functions for OP.GG style
+  const getTeamMaxDamage = (team: typeof blueTeam) => {
+    return Math.max(...team.map((p) => p.champion_damage), 1);
+  };
+
+  const getCSPerMin = (cs: number, duration: number | null | undefined) => {
+    if (!duration) return '0.0';
+    return (cs / (duration / 60)).toFixed(1);
+  };
+
+  const blueBgColor = game.winning_team === 'blue' ? 'bg-blue-50' : 'bg-blue-50/40';
+  const redBgColor = game.winning_team === 'red' ? 'bg-red-50' : 'bg-red-50/40';
+
   return (
-    <div>
-      {/* 게임 정보 */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-xl font-bold mb-2">{game.game_number}게임</h3>
-            <p className="text-sm text-gray-600">
-              게임 상태:{' '}
-              {game.game_status === 'completed'
-                ? '완료'
-                : game.game_status === 'in_progress'
-                  ? '진행중'
-                  : '시작 전'}
-            </p>
-            {game.duration && (
-              <p className="text-sm text-gray-600">
-                경기 시간: {Math.floor(game.duration / 60)}분{' '}
-                {game.duration % 60}초
-              </p>
-            )}
-            {game.notes && (
-              <p className="mt-2 p-3 bg-gray-50 rounded text-sm">{game.notes}</p>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
+    <div className="space-y-4">
+      {/* 게임 정보 헤더 - OP.GG 스타일 */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
             {game.winning_team && (
               <div
-                className={`px-4 py-2 rounded font-bold ${
+                className={`px-3 py-1 rounded font-bold text-sm ${
                   game.winning_team === 'blue'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-red-100 text-red-700'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-red-500 text-white'
                 }`}
               >
                 {game.winning_team === 'blue' ? '블루팀' : '레드팀'} 승리
               </div>
             )}
-            <Button variant="danger" onClick={onDeleteClick}>
-              게임 삭제
-            </Button>
+            {game.duration && (
+              <span className="text-sm text-gray-600">
+                {Math.floor(game.duration / 60)}분 {game.duration % 60}초
+              </span>
+            )}
+            <span className="text-xs text-gray-400">
+              {game.game_number}게임
+            </span>
           </div>
+          <Button variant="danger" size="sm" onClick={onDeleteClick}>
+            삭제
+          </Button>
         </div>
+        {game.notes && (
+          <p className="mt-3 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+            {game.notes}
+          </p>
+        )}
       </div>
 
-      {/* 밴픽 정보 */}
+      {/* 밴픽 정보 - OP.GG 스타일 */}
       {game.ban_picks && game.ban_picks.length > 0 && (
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h2 className="text-xl font-bold mb-4">밴픽</h2>
-
-          {/* 블루팀 밴 */}
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-blue-700 mb-2">블루팀 밴</h3>
-            <div className="flex gap-2 flex-wrap">
-              {game.ban_picks
-                .filter((bp) => bp.team === 'blue' && bp.phase === 'ban')
-                .sort((a, b) => a.order_number - b.order_number)
-                .map((bp) => (
-                  <span
-                    key={bp.id}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded font-medium text-sm"
-                  >
-                    {bp.champion_name}
-                  </span>
-                ))}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center justify-between gap-8">
+            {/* 블루팀 밴 */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-gray-500 w-8">밴</span>
+              <div className="flex gap-1">
+                <ChampionBanList
+                  bans={game.ban_picks
+                    .filter((bp) => bp.team === 'blue' && bp.phase === 'ban')
+                    .sort((a, b) => a.order_number - b.order_number)}
+                  team="blue"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* 레드팀 밴 */}
-          <div>
-            <h3 className="text-sm font-semibold text-red-700 mb-2">레드팀 밴</h3>
-            <div className="flex gap-2 flex-wrap">
-              {game.ban_picks
-                .filter((bp) => bp.team === 'red' && bp.phase === 'ban')
-                .sort((a, b) => a.order_number - b.order_number)
-                .map((bp) => (
-                  <span
-                    key={bp.id}
-                    className="px-3 py-1 bg-red-100 text-red-700 rounded font-medium text-sm"
-                  >
-                    {bp.champion_name}
-                  </span>
-                ))}
+            {/* 레드팀 밴 */}
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1">
+                <ChampionBanList
+                  bans={game.ban_picks
+                    .filter((bp) => bp.team === 'red' && bp.phase === 'ban')
+                    .sort((a, b) => a.order_number - b.order_number)}
+                  team="red"
+                />
+              </div>
+              <span className="text-xs font-semibold text-gray-500 w-8 text-right">밴</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* 블루팀 결과 */}
-      <div className="bg-blue-50 p-6 rounded-lg shadow mb-6">
-        <h2 className="text-xl font-bold mb-4 text-blue-700">블루팀</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded">
-            <thead className="bg-blue-100">
-              <tr>
-                <th className="px-4 py-2 text-left">이름</th>
-                <th className="px-4 py-2 text-left">포지션</th>
-                <th className="px-4 py-2 text-left">챔피언</th>
-                <th className="px-4 py-2 text-center">K</th>
-                <th className="px-4 py-2 text-center">D</th>
-                <th className="px-4 py-2 text-center">A</th>
-                <th className="px-4 py-2 text-center">KDA</th>
-                <th className="px-4 py-2 text-center">CS</th>
-                <th className="px-4 py-2 text-right">피해량</th>
-              </tr>
-            </thead>
-            <tbody>
-              {blueTeam.map((result) => (
-                <tr key={result.id} className="border-t">
-                  <td className="px-4 py-2">
-                    {result.members?.name && result.members?.summoner_name
-                      ? `${result.members.name}(${result.members.summoner_name})`
-                      : '-'}
-                  </td>
-                  <td className="px-4 py-2 capitalize">{result.position}</td>
-                  <td className="px-4 py-2 font-semibold">
-                    {result.champion_name}
-                  </td>
-                  <td className="px-4 py-2 text-center">{result.kills}</td>
-                  <td className="px-4 py-2 text-center">{result.deaths}</td>
-                  <td className="px-4 py-2 text-center">{result.assists}</td>
-                  <td className="px-4 py-2 text-center font-semibold">
-                    {calculateKDA(result.kills, result.deaths, result.assists)}
-                  </td>
-                  <td className="px-4 py-2 text-center">{result.cs}</td>
-                  <td className="px-4 py-2 text-right">
-                    {result.champion_damage.toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* 블루팀 결과 - OP.GG 스타일 */}
+      <div className={`rounded-lg p-4 ${blueBgColor}`}>
+        <h3 className="text-sm font-bold mb-3 text-blue-700 uppercase">블루팀</h3>
+        <div className="space-y-1">
+          {blueTeam.map((result) => {
+            const maxDamage = getTeamMaxDamage(blueTeam);
+            const damagePercent = (result.champion_damage / maxDamage) * 100;
+            const csPerMin = getCSPerMin(result.cs, game.duration);
+            const kda = calculateKDA(result.kills, result.deaths, result.assists);
+
+            return (
+              <div
+                key={result.id}
+                className="bg-white rounded-lg p-3 flex items-center gap-3 hover:shadow-md transition-shadow"
+              >
+                {/* 챔피언 아바타 */}
+                <ChampionAvatar
+                  championName={result.champion_name}
+                  size="lg"
+                  shape="circle"
+                  showTooltip
+                />
+
+                {/* 포지션 */}
+                <div className="w-12">
+                  <span className="text-xs font-semibold text-gray-600 uppercase">
+                    {result.position}
+                  </span>
+                </div>
+
+                {/* 플레이어 정보 */}
+                <div className="w-32">
+                  <div className="font-semibold text-sm text-gray-900">
+                    {result.members?.name || '-'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {result.members?.summoner_name || ''}
+                  </div>
+                </div>
+
+                {/* KDA */}
+                <div className="flex items-center gap-2 w-40">
+                  <span className="font-bold text-gray-900">
+                    {result.kills} / {result.deaths} / {result.assists}
+                  </span>
+                  <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-700">
+                    {kda}
+                  </span>
+                </div>
+
+                {/* CS */}
+                <div className="text-center w-24">
+                  <div className="font-semibold text-sm text-gray-900">{result.cs}</div>
+                  <div className="text-xs text-gray-500">{csPerMin} /분</div>
+                </div>
+
+                {/* 피해량 진행바 */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-500">피해량</span>
+                    <span className="font-semibold text-gray-900">
+                      {result.champion_damage.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-blue-400 to-blue-500 h-2 rounded-full transition-all"
+                      style={{ width: `${damagePercent}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* 레드팀 결과 */}
-      <div className="bg-red-50 p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4 text-red-700">레드팀</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded">
-            <thead className="bg-red-100">
-              <tr>
-                <th className="px-4 py-2 text-left">이름</th>
-                <th className="px-4 py-2 text-left">포지션</th>
-                <th className="px-4 py-2 text-left">챔피언</th>
-                <th className="px-4 py-2 text-center">K</th>
-                <th className="px-4 py-2 text-center">D</th>
-                <th className="px-4 py-2 text-center">A</th>
-                <th className="px-4 py-2 text-center">KDA</th>
-                <th className="px-4 py-2 text-center">CS</th>
-                <th className="px-4 py-2 text-right">피해량</th>
-              </tr>
-            </thead>
-            <tbody>
-              {redTeam.map((result) => (
-                <tr key={result.id} className="border-t">
-                  <td className="px-4 py-2">
-                    {result.members?.name && result.members?.summoner_name
-                      ? `${result.members.name}(${result.members.summoner_name})`
-                      : '-'}
-                  </td>
-                  <td className="px-4 py-2 capitalize">{result.position}</td>
-                  <td className="px-4 py-2 font-semibold">
-                    {result.champion_name}
-                  </td>
-                  <td className="px-4 py-2 text-center">{result.kills}</td>
-                  <td className="px-4 py-2 text-center">{result.deaths}</td>
-                  <td className="px-4 py-2 text-center">{result.assists}</td>
-                  <td className="px-4 py-2 text-center font-semibold">
-                    {calculateKDA(result.kills, result.deaths, result.assists)}
-                  </td>
-                  <td className="px-4 py-2 text-center">{result.cs}</td>
-                  <td className="px-4 py-2 text-right">
-                    {result.champion_damage.toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* 레드팀 결과 - OP.GG 스타일 */}
+      <div className={`rounded-lg p-4 ${redBgColor}`}>
+        <h3 className="text-sm font-bold mb-3 text-red-700 uppercase">레드팀</h3>
+        <div className="space-y-1">
+          {redTeam.map((result) => {
+            const maxDamage = getTeamMaxDamage(redTeam);
+            const damagePercent = (result.champion_damage / maxDamage) * 100;
+            const csPerMin = getCSPerMin(result.cs, game.duration);
+            const kda = calculateKDA(result.kills, result.deaths, result.assists);
+
+            return (
+              <div
+                key={result.id}
+                className="bg-white rounded-lg p-3 flex items-center gap-3 hover:shadow-md transition-shadow"
+              >
+                {/* 챔피언 아바타 */}
+                <ChampionAvatar
+                  championName={result.champion_name}
+                  size="lg"
+                  shape="circle"
+                  showTooltip
+                />
+
+                {/* 포지션 */}
+                <div className="w-12">
+                  <span className="text-xs font-semibold text-gray-600 uppercase">
+                    {result.position}
+                  </span>
+                </div>
+
+                {/* 플레이어 정보 */}
+                <div className="w-32">
+                  <div className="font-semibold text-sm text-gray-900">
+                    {result.members?.name || '-'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {result.members?.summoner_name || ''}
+                  </div>
+                </div>
+
+                {/* KDA */}
+                <div className="flex items-center gap-2 w-40">
+                  <span className="font-bold text-gray-900">
+                    {result.kills} / {result.deaths} / {result.assists}
+                  </span>
+                  <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-700">
+                    {kda}
+                  </span>
+                </div>
+
+                {/* CS */}
+                <div className="text-center w-24">
+                  <div className="font-semibold text-sm text-gray-900">{result.cs}</div>
+                  <div className="text-xs text-gray-500">{csPerMin} /분</div>
+                </div>
+
+                {/* 피해량 진행바 */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-500">피해량</span>
+                    <span className="font-semibold text-gray-900">
+                      {result.champion_damage.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-red-400 to-red-500 h-2 rounded-full transition-all"
+                      style={{ width: `${damagePercent}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
