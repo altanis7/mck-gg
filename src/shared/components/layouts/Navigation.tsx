@@ -10,6 +10,7 @@ import { Button } from "@/shared/components/ui/Button";
 const publicNavItems = [
   { href: "/", label: "홈" },
   { href: "/matches", label: "경기 기록" },
+  { href: "/ratings", label: "랭킹" },
   { href: "/stats", label: "통계" },
 ];
 
