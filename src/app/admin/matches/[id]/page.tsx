@@ -3,6 +3,11 @@
 import { use, useState } from 'react';
 import Link from 'next/link';
 import { useMatchSeriesDetail } from '@/features/matches/hooks/useMatchSeriesDetail';
+import { useDeleteGame } from '@/features/matches/hooks/useDeleteGame';
+import { useDeleteSeries } from '@/features/matches/hooks/useDeleteSeries';
+import { GameRegistrationForm } from '@/features/matches/components/GameRegistrationForm';
+import { DeleteGameModal } from '@/features/matches/components/DeleteGameModal';
+import { DeleteSeriesModal } from '@/features/matches/components/DeleteSeriesModal';
 import { Button } from '@/shared/components/ui/Button';
 import { Loading } from '@/shared/components/ui/Loading';
 import { ErrorMessage } from '@/shared/components/ui/ErrorMessage';
@@ -14,8 +19,38 @@ export default function MatchDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { data: seriesDetail, isLoading, error } = useMatchSeriesDetail(id);
+  const { data: seriesDetail, isLoading, error, refetch } = useMatchSeriesDetail(id);
   const [selectedGameIndex, setSelectedGameIndex] = useState(0);
+  const [isAddingGame, setIsAddingGame] = useState(false);
+  const [gameToDelete, setGameToDelete] = useState<string | null>(null);
+  const [showDeleteSeriesModal, setShowDeleteSeriesModal] = useState(false);
+  const deleteGameMutation = useDeleteGame(id);
+  const deleteSeriesMutation = useDeleteSeries();
+
+  const handleDeleteGame = async () => {
+    if (!gameToDelete) return;
+
+    try {
+      await deleteGameMutation.mutateAsync(gameToDelete);
+      setGameToDelete(null);
+      // 삭제된 게임이 현재 선택된 게임이면 첫 번째 게임으로 이동
+      if (seriesDetail && selectedGameIndex >= seriesDetail.games.length - 1) {
+        setSelectedGameIndex(Math.max(0, seriesDetail.games.length - 2));
+      }
+    } catch (error) {
+      console.error('게임 삭제 실패:', error);
+    }
+  };
+
+  const handleDeleteSeries = async () => {
+    try {
+      await deleteSeriesMutation.mutateAsync(id);
+      // useDeleteSeries에서 자동으로 리다이렉트됨
+    } catch (error) {
+      console.error('시리즈 삭제 실패:', error);
+      setShowDeleteSeriesModal(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -96,12 +131,45 @@ export default function MatchDetailPage({
                   승리
                 </div>
               )}
+            <Button
+              variant="danger"
+              onClick={() => setShowDeleteSeriesModal(true)}
+            >
+              시리즈 삭제
+            </Button>
           </div>
         </div>
         {seriesDetail.notes && (
           <p className="mt-4 p-4 bg-gray-50 rounded">{seriesDetail.notes}</p>
         )}
       </div>
+
+      {/* 게임 추가 버튼 */}
+      {seriesDetail.series_status !== 'completed' && (
+        <div className="mb-6">
+          <Button
+            onClick={() => setIsAddingGame(true)}
+            disabled={isAddingGame}
+          >
+            + 게임 추가
+          </Button>
+        </div>
+      )}
+
+      {/* 게임 추가 폼 */}
+      {isAddingGame && (
+        <div className="mb-6">
+          <GameRegistrationForm
+            seriesId={id}
+            gameNumber={seriesDetail.games.length + 1}
+            onSuccess={() => {
+              setIsAddingGame(false);
+              refetch();
+            }}
+            onCancel={() => setIsAddingGame(false)}
+          />
+        </div>
+      )}
 
       {/* 게임 탭 */}
       {seriesDetail.games.length > 0 && (
@@ -128,23 +196,82 @@ export default function MatchDetailPage({
           </div>
 
           {selectedGame && (
-            <GameResultsDisplay game={selectedGame} />
+            <GameResultsDisplay
+              game={selectedGame}
+              onDeleteClick={() => setGameToDelete(selectedGame.id)}
+            />
           )}
         </>
       )}
 
-      {seriesDetail.games.length === 0 && (
+      {/* 게임 삭제 확인 모달 */}
+      {gameToDelete && (
+        <DeleteGameModal
+          isOpen={!!gameToDelete}
+          onClose={() => setGameToDelete(null)}
+          onConfirm={handleDeleteGame}
+          gameNumber={
+            seriesDetail.games.find((g) => g.id === gameToDelete)?.game_number ||
+            0
+          }
+          isDeleting={deleteGameMutation.isPending}
+        />
+      )}
+
+      {seriesDetail.games.length === 0 && !isAddingGame && (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">등록된 게임이 없습니다</p>
+          <p className="text-gray-500 mb-4">등록된 게임이 없습니다</p>
+          <p className="text-sm text-gray-400">
+            위의 "게임 추가" 버튼을 클릭하여 첫 게임을 등록하세요
+          </p>
         </div>
+      )}
+
+      {/* 시리즈 삭제 확인 모달 */}
+      {showDeleteSeriesModal && (
+        <DeleteSeriesModal
+          isOpen={showDeleteSeriesModal}
+          onClose={() => setShowDeleteSeriesModal(false)}
+          onConfirm={handleDeleteSeries}
+          seriesDate={seriesDetail.series_date}
+          seriesType={
+            seriesDetail.series_type === 'bo3'
+              ? '3판 2선승'
+              : seriesDetail.series_type === 'bo5'
+                ? '5판 3선승'
+                : '단판'
+          }
+          gameCount={seriesDetail.games.length}
+          isDeleting={deleteSeriesMutation.isPending}
+        />
       )}
     </div>
   );
 }
 
-function GameResultsDisplay({ game }: { game: GameDetail }) {
-  const blueTeam = game.game_results.filter((r) => r.team === 'blue');
-  const redTeam = game.game_results.filter((r) => r.team === 'red');
+function GameResultsDisplay({
+  game,
+  onDeleteClick,
+}: {
+  game: GameDetail;
+  onDeleteClick: () => void;
+}) {
+  const positionOrder: Record<string, number> = {
+    top: 1,
+    jungle: 2,
+    mid: 3,
+    adc: 4,
+    support: 5,
+  };
+
+  const sortByPosition = (results: typeof game.game_results) => {
+    return [...results].sort((a, b) => {
+      return (positionOrder[a.position] || 99) - (positionOrder[b.position] || 99);
+    });
+  };
+
+  const blueTeam = sortByPosition(game.game_results.filter((r) => r.team === 'blue'));
+  const redTeam = sortByPosition(game.game_results.filter((r) => r.team === 'red'));
 
   const calculateKDA = (kills: number, deaths: number, assists: number) => {
     if (deaths === 0) return ((kills + assists) / 1).toFixed(2);
@@ -155,8 +282,9 @@ function GameResultsDisplay({ game }: { game: GameDetail }) {
     <div>
       {/* 게임 정보 */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-start">
           <div>
+            <h3 className="text-xl font-bold mb-2">{game.game_number}게임</h3>
             <p className="text-sm text-gray-600">
               게임 상태:{' '}
               {game.game_status === 'completed'
@@ -171,23 +299,71 @@ function GameResultsDisplay({ game }: { game: GameDetail }) {
                 {game.duration % 60}초
               </p>
             )}
+            {game.notes && (
+              <p className="mt-2 p-3 bg-gray-50 rounded text-sm">{game.notes}</p>
+            )}
           </div>
-          {game.winning_team && (
-            <div
-              className={`px-4 py-2 rounded font-bold ${
-                game.winning_team === 'blue'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-red-100 text-red-700'
-              }`}
-            >
-              {game.winning_team === 'blue' ? '블루팀' : '레드팀'} 승리
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {game.winning_team && (
+              <div
+                className={`px-4 py-2 rounded font-bold ${
+                  game.winning_team === 'blue'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-red-100 text-red-700'
+                }`}
+              >
+                {game.winning_team === 'blue' ? '블루팀' : '레드팀'} 승리
+              </div>
+            )}
+            <Button variant="danger" onClick={onDeleteClick}>
+              게임 삭제
+            </Button>
+          </div>
         </div>
-        {game.notes && (
-          <p className="mt-2 p-3 bg-gray-50 rounded text-sm">{game.notes}</p>
-        )}
       </div>
+
+      {/* 밴픽 정보 */}
+      {game.ban_picks && game.ban_picks.length > 0 && (
+        <div className="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 className="text-xl font-bold mb-4">밴픽</h2>
+
+          {/* 블루팀 밴 */}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-blue-700 mb-2">블루팀 밴</h3>
+            <div className="flex gap-2 flex-wrap">
+              {game.ban_picks
+                .filter((bp) => bp.team === 'blue' && bp.phase === 'ban')
+                .sort((a, b) => a.order_number - b.order_number)
+                .map((bp) => (
+                  <span
+                    key={bp.id}
+                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded font-medium text-sm"
+                  >
+                    {bp.champion_name}
+                  </span>
+                ))}
+            </div>
+          </div>
+
+          {/* 레드팀 밴 */}
+          <div>
+            <h3 className="text-sm font-semibold text-red-700 mb-2">레드팀 밴</h3>
+            <div className="flex gap-2 flex-wrap">
+              {game.ban_picks
+                .filter((bp) => bp.team === 'red' && bp.phase === 'ban')
+                .sort((a, b) => a.order_number - b.order_number)
+                .map((bp) => (
+                  <span
+                    key={bp.id}
+                    className="px-3 py-1 bg-red-100 text-red-700 rounded font-medium text-sm"
+                  >
+                    {bp.champion_name}
+                  </span>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 블루팀 결과 */}
       <div className="bg-blue-50 p-6 rounded-lg shadow mb-6">
@@ -196,6 +372,7 @@ function GameResultsDisplay({ game }: { game: GameDetail }) {
           <table className="min-w-full bg-white rounded">
             <thead className="bg-blue-100">
               <tr>
+                <th className="px-4 py-2 text-left">이름</th>
                 <th className="px-4 py-2 text-left">포지션</th>
                 <th className="px-4 py-2 text-left">챔피언</th>
                 <th className="px-4 py-2 text-center">K</th>
@@ -204,12 +381,16 @@ function GameResultsDisplay({ game }: { game: GameDetail }) {
                 <th className="px-4 py-2 text-center">KDA</th>
                 <th className="px-4 py-2 text-center">CS</th>
                 <th className="px-4 py-2 text-right">피해량</th>
-                <th className="px-4 py-2 text-right">골드</th>
               </tr>
             </thead>
             <tbody>
               {blueTeam.map((result) => (
                 <tr key={result.id} className="border-t">
+                  <td className="px-4 py-2">
+                    {result.members?.name && result.members?.summoner_name
+                      ? `${result.members.name}(${result.members.summoner_name})`
+                      : '-'}
+                  </td>
                   <td className="px-4 py-2 capitalize">{result.position}</td>
                   <td className="px-4 py-2 font-semibold">
                     {result.champion_name}
@@ -223,9 +404,6 @@ function GameResultsDisplay({ game }: { game: GameDetail }) {
                   <td className="px-4 py-2 text-center">{result.cs}</td>
                   <td className="px-4 py-2 text-right">
                     {result.champion_damage.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2 text-right">
-                    {result.gold_earned.toLocaleString()}
                   </td>
                 </tr>
               ))}
@@ -241,6 +419,7 @@ function GameResultsDisplay({ game }: { game: GameDetail }) {
           <table className="min-w-full bg-white rounded">
             <thead className="bg-red-100">
               <tr>
+                <th className="px-4 py-2 text-left">이름</th>
                 <th className="px-4 py-2 text-left">포지션</th>
                 <th className="px-4 py-2 text-left">챔피언</th>
                 <th className="px-4 py-2 text-center">K</th>
@@ -249,12 +428,16 @@ function GameResultsDisplay({ game }: { game: GameDetail }) {
                 <th className="px-4 py-2 text-center">KDA</th>
                 <th className="px-4 py-2 text-center">CS</th>
                 <th className="px-4 py-2 text-right">피해량</th>
-                <th className="px-4 py-2 text-right">골드</th>
               </tr>
             </thead>
             <tbody>
               {redTeam.map((result) => (
                 <tr key={result.id} className="border-t">
+                  <td className="px-4 py-2">
+                    {result.members?.name && result.members?.summoner_name
+                      ? `${result.members.name}(${result.members.summoner_name})`
+                      : '-'}
+                  </td>
                   <td className="px-4 py-2 capitalize">{result.position}</td>
                   <td className="px-4 py-2 font-semibold">
                     {result.champion_name}
@@ -268,9 +451,6 @@ function GameResultsDisplay({ game }: { game: GameDetail }) {
                   <td className="px-4 py-2 text-center">{result.cs}</td>
                   <td className="px-4 py-2 text-right">
                     {result.champion_damage.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2 text-right">
-                    {result.gold_earned.toLocaleString()}
                   </td>
                 </tr>
               ))}
