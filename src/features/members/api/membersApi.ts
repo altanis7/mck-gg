@@ -6,6 +6,7 @@ import {
   MembersResponse,
   MemberResponse,
   DeleteMemberResponse,
+  MemberStatsResponse,
 } from './types';
 
 // 멤버 목록 조회
@@ -34,4 +35,9 @@ export async function updateMember(
 // 멤버 삭제
 export async function deleteMember(id: string): Promise<DeleteMemberResponse> {
   return await apiClient.delete<DeleteMemberResponse>(`/members/${id}`);
+}
+
+// 멤버 통계 조회
+export async function getMemberStats(id: string): Promise<MemberStatsResponse> {
+  return await apiClient.get<MemberStatsResponse>(`/members/${id}/stats`);
 }
