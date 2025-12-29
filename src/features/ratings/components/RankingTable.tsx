@@ -6,6 +6,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { MemberRankingWithTier } from "../api/types";
 import { TierBadge } from "./TierBadge";
 import { ChampionAvatar } from "@/shared/components/ui/ChampionAvatar";
@@ -117,9 +118,12 @@ export function RankingTable({ rankings }: RankingTableProps) {
                 {/* 소환사 이름 */}
                 <td className="px-4 py-4">
                   <div className="flex flex-col gap-1">
-                    <span className="font-semibold text-white">
+                    <Link
+                      href={`/members/${member.id}`}
+                      className="font-semibold text-white hover:text-blue-400 transition-colors"
+                    >
                       {member.name}({member.summoner_name})
-                    </span>
+                    </Link>
                     {(member.current_streak >= 3 ||
                       member.current_streak <= -3) && (
                       <span
@@ -223,57 +227,57 @@ export function RankingTable({ rankings }: RankingTableProps) {
       {/* 모바일 카드 리스트 */}
       <div className="md:hidden bg-gray-800 divide-y divide-gray-700 rounded-lg overflow-hidden">
         {rankings.map((member) => (
-            <div
+            <Link
               key={member.id}
-              className="flex items-center gap-3 p-3 hover:bg-gray-750 transition-colors"
+              href={`/members/${member.id}`}
+              className="flex items-center gap-3 p-4 hover:bg-gray-750 transition-colors"
             >
-              {/* 순위 */}
-              <div className="flex-shrink-0 w-8">
-                <span
-                  className={cn(
-                    "text-lg font-bold",
-                    member.ranking === 1 && "text-yellow-400",
-                    member.ranking === 2 && "text-gray-300",
-                    member.ranking === 3 && "text-amber-600",
-                    member.ranking > 3 && "text-white"
-                  )}
-                >
-                  {member.ranking}
-                </span>
-              </div>
-
-              {/* 플레이어 이름 */}
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-white truncate">
-                  {member.name}
+              {/* 왼쪽: 순위 + 티어 */}
+              <div className="flex items-center gap-3 flex-shrink-0">
+                {/* 순위 */}
+                <div className="w-8">
+                  <span
+                    className={cn(
+                      "text-lg font-bold",
+                      member.ranking === 1 && "text-yellow-400",
+                      member.ranking === 2 && "text-gray-300",
+                      member.ranking === 3 && "text-amber-600",
+                      member.ranking > 3 && "text-white"
+                    )}
+                  >
+                    {member.ranking}
+                  </span>
                 </div>
-              </div>
 
-              {/* 티어 아이콘 */}
-              <div className="flex-shrink-0">
+                {/* 티어 아이콘 (크게) */}
                 <TierBadge
                   tierConfig={member.tierConfig}
-                  size="sm"
+                  size="lg"
                   showName={false}
                 />
               </div>
 
-              {/* LP + 승률 + 게임수 */}
-              <div className="flex-shrink-0 text-right">
-                <div className="text-xs text-gray-400 mb-0.5">
-                  {member.current_elo} LP
+              {/* 오른쪽: 플레이어 정보 */}
+              <div className="flex-1 min-w-0">
+                {/* 이름 */}
+                <div className="text-sm font-semibold text-white truncate mb-1">
+                  {member.name}
                 </div>
-                <div
-                  className="text-sm font-semibold mb-0.5"
-                  style={{ color: getWinRateColor(member.win_rate) }}
-                >
-                  {member.win_rate.toFixed(1)}%
-                </div>
-                <div className="text-xs text-gray-400">
-                  {member.total_games}게임
+
+                {/* LP + 승률 + 승-패 */}
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <span>{member.current_elo} LP</span>
+                  <span>•</span>
+                  <span style={{ color: getWinRateColor(member.win_rate) }}>
+                    {member.win_rate.toFixed(1)}%
+                  </span>
+                  <span>•</span>
+                  <span>
+                    {member.total_wins}승 {member.total_games - member.total_wins}패
+                  </span>
                 </div>
               </div>
-            </div>
+            </Link>
         ))}
       </div>
     </>
