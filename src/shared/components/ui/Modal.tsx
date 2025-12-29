@@ -36,13 +36,13 @@ export function Modal({ isOpen, onClose, children, title, className }: ModalProp
 
         <div
           className={cn(
-            'relative bg-white rounded-lg shadow-xl max-w-md w-full',
+            'relative bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-w-md w-full',
             className
           )}
         >
           {title && (
-            <div className="border-b border-gray-200 px-6 py-4">
-              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <div className="border-b border-slate-700 px-6 py-4">
+              <h3 className="text-lg font-semibold text-white">{title}</h3>
             </div>
           )}
 
