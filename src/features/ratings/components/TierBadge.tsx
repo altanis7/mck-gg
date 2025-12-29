@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 interface TierBadgeProps {
   tierConfig: TierConfig;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   showName?: boolean;
   showStreak?: boolean;
   currentStreak?: number;
@@ -21,6 +21,7 @@ const SIZE_MAP = {
   sm: { icon: 20, text: 'text-xs' },
   md: { icon: 28, text: 'text-sm' },
   lg: { icon: 36, text: 'text-base' },
+  xl: { icon: 48, text: 'text-lg' },
 };
 
 function getStreakLabel(tierName: string, streak: number): string {
@@ -41,6 +42,11 @@ export function TierBadge({
   className,
 }: TierBadgeProps) {
   const sizeConfig = SIZE_MAP[size];
+
+  if (!tierConfig) {
+    return null;
+  }
+
   const displayText = showStreak && showName
     ? getStreakLabel(tierConfig.name, currentStreak)
     : tierConfig.name;
