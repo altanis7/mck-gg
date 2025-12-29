@@ -51,7 +51,7 @@ export async function GET() {
           .limit(1)
           .single();
 
-        const lastGameDate = lastGameData?.games?.match_series?.series_date || undefined;
+        const lastGameDate = (lastGameData as any)?.games?.match_series?.series_date || undefined;
 
         // 평균 KDA 계산
         const { data: kdaData } = await supabaseAdmin

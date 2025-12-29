@@ -5,10 +5,10 @@ import { RatingHistoryResponse, MemberRating } from '@/features/ratings/api/type
 // GET /api/ratings/[memberId] - 개인 ELO 히스토리 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: { memberId: string } }
+  { params }: { params: Promise<{ memberId: string }> }
 ) {
   try {
-    const memberId = params.memberId;
+    const { memberId } = await params;
 
     if (!memberId) {
       return NextResponse.json<RatingHistoryResponse>(

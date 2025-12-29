@@ -21,6 +21,13 @@ export function useRankings() {
           ...member,
           tier: tierConfig.name,
           tierConfig,
+          topChampions: member.topChampions || [],
+          lastGameDate: member.lastGameDate,
+          avgKda: member.avgKda,
+          avgKills: member.avgKills,
+          avgDeaths: member.avgDeaths,
+          avgAssists: member.avgAssists,
+          rankingChange: member.rankingChange,
         };
       });
     },

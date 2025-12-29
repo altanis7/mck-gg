@@ -47,6 +47,13 @@ export interface MemberRanking {
   current_streak: number;
   ranking: number;
   win_rate: number;
+  topChampions?: ChampionStats[];
+  lastGameDate?: string;
+  avgKda?: number;
+  avgKills?: number;
+  avgDeaths?: number;
+  avgAssists?: number;
+  rankingChange?: number;
 }
 
 // 티어 타입

@@ -64,13 +64,13 @@ export default function StatsPage() {
   const playerStatsMap = new Map<string, PlayerStats>();
 
   // 완료된 시리즈의 모든 게임 결과 집계
-  series.forEach((serie) => {
+  series.forEach((serie: any) => {
     if (serie.series_status !== "completed") return;
 
-    serie.games?.forEach((game) => {
+    serie.games?.forEach((game: any) => {
       if (!game.game_results) return;
 
-      game.game_results.forEach((result) => {
+      game.game_results.forEach((result: any) => {
         if (!result.member_id) return;
 
         const memberId = result.member_id;

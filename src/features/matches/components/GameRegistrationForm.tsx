@@ -137,10 +137,20 @@ export function GameRegistrationForm({
         ...bluePlayers.map((p) => ({
           ...p,
           team: "blue" as const,
+          damage_taken: 0,
+          gold_earned: 0,
+          vision_score: 0,
+          wards_placed: 0,
+          wards_destroyed: 0,
         })),
         ...redPlayers.map((p) => ({
           ...p,
           team: "red" as const,
+          damage_taken: 0,
+          gold_earned: 0,
+          vision_score: 0,
+          wards_placed: 0,
+          wards_destroyed: 0,
         })),
       ];
 

@@ -6,12 +6,19 @@ import {
   MatchSeriesResponse,
 } from '@/features/matches/api/types';
 
-// GET: 시리즈 목록 조회
+// GET: 시리즈 목록 조회 (games, game_results 포함)
 export async function GET() {
   try {
     const { data, error } = await supabaseAdmin
       .from('match_series')
-      .select('*')
+      .select(`
+        *,
+        games(
+          *,
+          game_results(*),
+          ban_picks(*)
+        )
+      `)
       .order('series_date', { ascending: false });
 
     if (error) {
@@ -23,7 +30,7 @@ export async function GET() {
 
     return NextResponse.json<MatchSeriesListResponse>({
       success: true,
-      data,
+      data: data as any, // 타입 단언 (MatchSeriesDetail[]로 반환됨)
     });
   } catch (error) {
     return NextResponse.json<MatchSeriesListResponse>(
