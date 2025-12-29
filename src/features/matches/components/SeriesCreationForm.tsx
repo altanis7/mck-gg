@@ -46,8 +46,8 @@ export function SeriesCreationForm() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white p-8 rounded-lg shadow">
-        <h2 className="text-2xl font-bold mb-6">새 시리즈 생성</h2>
+      <div className="bg-slate-800 border border-slate-700 rounded-lg p-8">
+        <h2 className="text-2xl font-bold text-white mb-6">새 시리즈 생성</h2>
 
         {error && <ErrorMessage message={error} className="mb-4" />}
 
@@ -55,7 +55,7 @@ export function SeriesCreationForm() {
           {/* 날짜/시간 */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 날짜
               </label>
               <Input
@@ -66,7 +66,7 @@ export function SeriesCreationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 시간
               </label>
               <Input
@@ -80,7 +80,7 @@ export function SeriesCreationForm() {
 
           {/* 시리즈 타입 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-300 mb-3">
               시리즈 형식
             </label>
             <div className="flex gap-4">
@@ -92,7 +92,7 @@ export function SeriesCreationForm() {
                   onChange={(e) => setSeriesType(e.target.value as 'bo3')}
                   className="mr-2"
                 />
-                <span className="text-sm">3판 2선승 (BO3)</span>
+                <span className="text-sm text-white">3판 2선승 (BO3)</span>
               </label>
               <label className="flex items-center cursor-pointer">
                 <input
@@ -102,10 +102,10 @@ export function SeriesCreationForm() {
                   onChange={(e) => setSeriesType(e.target.value as 'bo5')}
                   className="mr-2"
                 />
-                <span className="text-sm">5판 3선승 (BO5)</span>
+                <span className="text-sm text-white">5판 3선승 (BO5)</span>
               </label>
             </div>
-            <p className="mt-2 text-xs text-gray-500">
+            <p className="mt-2 text-xs text-gray-400">
               시리즈 생성 후 각 게임을 개별적으로 추가할 수 있습니다
             </p>
           </div>
@@ -114,7 +114,7 @@ export function SeriesCreationForm() {
           <div>
             <label
               htmlFor="notes"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-300 mb-2"
             >
               메모 (선택)
             </label>
@@ -123,7 +123,7 @@ export function SeriesCreationForm() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="예: 정규 시즌 1차, 플레이오프 결승 등"
             />
           </div>
@@ -150,11 +150,11 @@ export function SeriesCreationForm() {
       </div>
 
       {/* 안내 메시지 */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <h3 className="text-sm font-semibold text-blue-900 mb-2">
+      <div className="mt-6 p-4 bg-slate-800 border border-slate-700 rounded-lg">
+        <h3 className="text-sm font-semibold text-blue-400 mb-2">
           📌 시리즈 생성 후 절차
         </h3>
-        <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+        <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
           <li>시리즈 생성 후 자동으로 상세 페이지로 이동합니다</li>
           <li>상세 페이지에서 "게임 추가" 버튼을 클릭하세요</li>
           <li>각 게임의 밴픽(선택)과 플레이어 통계를 입력하세요</li>

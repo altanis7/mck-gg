@@ -212,8 +212,8 @@ export function GameRegistrationForm({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-xl font-bold mb-4">{gameNumber}게임 등록</h3>
+      <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+        <h3 className="text-xl font-bold text-white mb-4">{gameNumber}게임 등록</h3>
 
         {error && <ErrorMessage message={error} className="mb-4" />}
 
@@ -221,7 +221,7 @@ export function GameRegistrationForm({
           {/* 게임 기본 정보 */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 경기 시간 (MM:SS)
               </label>
               <Input
@@ -233,7 +233,7 @@ export function GameRegistrationForm({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 승리 팀
               </label>
               <div className="flex gap-4 mt-2">
@@ -247,7 +247,7 @@ export function GameRegistrationForm({
                     }
                     className="mr-2"
                   />
-                  <span>블루팀</span>
+                  <span className="text-white">블루팀</span>
                 </label>
                 <label className="flex items-center cursor-pointer">
                   <input
@@ -259,19 +259,19 @@ export function GameRegistrationForm({
                     }
                     className="mr-2"
                   />
-                  <span>레드팀</span>
+                  <span className="text-white">레드팀</span>
                 </label>
               </div>
             </div>
           </div>
 
           {/* 밴 정보 */}
-          <div className="bg-gray-50 p-4 rounded">
-            <h4 className="text-lg font-bold mb-4">밴 정보</h4>
+          <div className="bg-slate-900 p-4 rounded">
+            <h4 className="text-lg font-bold text-white mb-4">밴 정보</h4>
             <div className="grid grid-cols-2 gap-6">
               {/* 블루팀 밴 */}
               <div>
-                <h5 className="text-sm font-semibold text-blue-700 mb-2">
+                <h5 className="text-sm font-semibold text-blue-400 mb-2">
                   블루팀
                 </h5>
                 <div className="space-y-2">
@@ -293,7 +293,7 @@ export function GameRegistrationForm({
 
               {/* 레드팀 밴 */}
               <div>
-                <h5 className="text-sm font-semibold text-red-700 mb-2">
+                <h5 className="text-sm font-semibold text-red-400 mb-2">
                   레드팀
                 </h5>
                 <div className="space-y-2">
@@ -316,11 +316,11 @@ export function GameRegistrationForm({
           </div>
 
           {/* 블루팀 */}
-          <div className="bg-blue-50 p-4 rounded">
-            <h4 className="text-lg font-bold text-blue-700 mb-4">블루팀</h4>
+          <div className="bg-blue-950 p-4 rounded">
+            <h4 className="text-lg font-bold text-blue-400 mb-4">블루팀</h4>
 
             {/* 헤더 행 */}
-            <div className="grid grid-cols-10 gap-2 items-center text-xs font-semibold text-gray-600 mb-2">
+            <div className="grid grid-cols-10 gap-2 items-center text-xs font-semibold text-gray-300 mb-2">
               <div className="col-span-1">포지션</div>
               <div className="col-span-2">멤버</div>
               <div className="col-span-2">챔피언</div>
@@ -349,11 +349,11 @@ export function GameRegistrationForm({
           </div>
 
           {/* 레드팀 */}
-          <div className="bg-red-50 p-4 rounded">
-            <h4 className="text-lg font-bold text-red-700 mb-4">레드팀</h4>
+          <div className="bg-red-950 p-4 rounded">
+            <h4 className="text-lg font-bold text-red-400 mb-4">레드팀</h4>
 
             {/* 헤더 행 */}
-            <div className="grid grid-cols-10 gap-2 items-center text-xs font-semibold text-gray-600 mb-2">
+            <div className="grid grid-cols-10 gap-2 items-center text-xs font-semibold text-gray-300 mb-2">
               <div className="col-span-1">포지션</div>
               <div className="col-span-2">멤버</div>
               <div className="col-span-2">챔피언</div>
@@ -425,7 +425,7 @@ function PlayerInput({
 
   return (
     <div className="grid grid-cols-10 gap-2 items-center text-sm">
-      <div className="col-span-1 font-semibold">{positionLabels[position]}</div>
+      <div className="col-span-1 font-semibold text-white">{positionLabels[position]}</div>
 
       <div className="col-span-2">
         <Select

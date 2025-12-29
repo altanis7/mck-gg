@@ -32,15 +32,15 @@ export default function MatchesPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">경기 관리</h1>
+        <h1 className="text-3xl font-bold text-white">경기 관리</h1>
         <Link href="/admin/matches/new">
           <Button>경기 등록</Button>
         </Link>
       </div>
 
       {series.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500 mb-4">등록된 시리즈가 없습니다</p>
+        <div className="text-center py-12 bg-slate-800 border border-slate-700 rounded-lg">
+          <p className="text-gray-300 mb-4">등록된 시리즈가 없습니다</p>
           <Link href="/admin/matches/new">
             <Button>첫 시리즈 등록하기</Button>
           </Link>
@@ -66,18 +66,18 @@ export default function MatchesPage() {
               <Link
                 key={s.id}
                 href={`/admin/matches/${s.id}`}
-                className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+                className="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:bg-slate-750 transition-colors block"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-400">
                       {new Date(s.series_date).toLocaleString('ko-KR')}
                     </p>
-                    <p className="text-lg font-semibold mt-1">
+                    <p className="text-lg font-semibold text-white mt-1">
                       {seriesTypeLabel}
                     </p>
                     {s.series_status === 'completed' && s.winner_team && (
-                      <p className="text-sm mt-1">
+                      <p className="text-sm text-gray-300 mt-1">
                         {s.blue_wins} - {s.red_wins}
                         <span
                           className={`ml-2 ${
@@ -104,7 +104,7 @@ export default function MatchesPage() {
                   </div>
                 </div>
                 {s.notes && (
-                  <p className="text-gray-600 mt-2 text-sm">{s.notes}</p>
+                  <p className="text-gray-400 mt-2 text-sm">{s.notes}</p>
                 )}
               </Link>
             );
