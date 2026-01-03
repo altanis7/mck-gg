@@ -10,6 +10,7 @@ import Link from "next/link";
 import { MemberRankingWithTier } from "../api/types";
 import { TierBadge } from "./TierBadge";
 import { ChampionAvatar } from "@/shared/components/ui/ChampionAvatar";
+import { SeriesStreakBadge } from "./SeriesStreakBadge";
 import { cn } from "@/lib/utils";
 
 interface RankingTableProps {
@@ -124,21 +125,11 @@ export function RankingTable({ rankings }: RankingTableProps) {
                     >
                       {member.name}({member.summoner_name})
                     </Link>
-                    {(member.current_streak >= 3 ||
-                      member.current_streak <= -3) && (
-                      <span
-                        className={cn(
-                          "text-xs font-semibold",
-                          member.current_streak >= 3
-                            ? "text-green-500"
-                            : "text-red-500"
-                        )}
-                      >
-                        {member.current_streak >= 3
-                          ? `${member.current_streak}연승`
-                          : `${Math.abs(member.current_streak)}연패`}
-                      </span>
-                    )}
+                    <SeriesStreakBadge
+                      streak={member.current_series_streak}
+                      size="sm"
+                      animated={true}
+                    />
                   </div>
                 </td>
 
@@ -259,9 +250,16 @@ export function RankingTable({ rankings }: RankingTableProps) {
 
               {/* 오른쪽: 플레이어 정보 */}
               <div className="flex-1 min-w-0">
-                {/* 이름 */}
-                <div className="text-sm font-semibold text-white truncate mb-1">
-                  {member.name}
+                {/* 이름 + 배지 */}
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="text-sm font-semibold text-white truncate">
+                    {member.name}
+                  </div>
+                  <SeriesStreakBadge
+                    streak={member.current_series_streak}
+                    size="sm"
+                    animated={true}
+                  />
                 </div>
 
                 {/* LP + 승률 + 승-패 */}

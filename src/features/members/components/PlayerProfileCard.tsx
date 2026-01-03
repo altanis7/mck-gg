@@ -1,13 +1,13 @@
 import { Member } from "../api/types";
 import { PlayerOverallStats } from "../api/types";
 import { TierBadge } from "@/features/ratings/components/TierBadge";
+import { SeriesStreakBadge } from "@/features/ratings/components/SeriesStreakBadge";
 import { TierConfig } from "@/features/ratings/api/types";
 import {
   getKdaColor,
   getWinRateColor,
   formatDamage,
 } from "../utils/statsCalculations";
-import { cn } from "@/lib/utils";
 
 interface PlayerProfileCardProps {
   member: Member;
@@ -92,21 +92,14 @@ export function PlayerProfileCard({ member, stats, tierConfig }: PlayerProfileCa
         </div>
       </div>
 
-      {/* 연승/연패 표시 */}
-      {(stats.currentStreak >= 3 || stats.currentStreak <= -3) && (
-        <div className="mt-4 pt-4 border-t border-slate-700">
-          <div
-            className={cn(
-              "text-center py-2 px-4 rounded font-bold text-sm",
-              stats.currentStreak >= 3
-                ? "bg-green-600/20 text-green-500"
-                : "bg-red-600/20 text-red-500"
-            )}
-          >
-            {stats.currentStreak >= 3
-              ? `${stats.currentStreak}연승`
-              : `${Math.abs(stats.currentStreak)}연패`}
-          </div>
+      {/* 시리즈 연승/연패 표시 */}
+      {Math.abs(stats.currentSeriesStreak) >= 3 && (
+        <div className="mt-4 pt-4 border-t border-slate-700 flex justify-center">
+          <SeriesStreakBadge
+            streak={stats.currentSeriesStreak}
+            size="lg"
+            animated={true}
+          />
         </div>
       )}
     </div>
