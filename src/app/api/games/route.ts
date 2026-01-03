@@ -115,6 +115,87 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// 헬퍼 함수: 멤버의 시리즈 연승/연패 업데이트
+async function updateMemberSeriesStreaks(
+  seriesId: string,
+  winnerTeam: "blue" | "red"
+) {
+  try {
+    // 1. 시리즈의 첫 번째 게임에서 참가자 10명 조회
+    const { data: firstGame } = await supabaseAdmin
+      .from("games")
+      .select("id")
+      .eq("match_series_id", seriesId)
+      .eq("game_number", 1)
+      .single();
+
+    if (!firstGame) {
+      console.error("첫 번째 게임을 찾을 수 없습니다:", seriesId);
+      return;
+    }
+
+    const { data: participants } = await supabaseAdmin
+      .from("game_results")
+      .select("member_id, team")
+      .eq("game_id", firstGame.id);
+
+    if (!participants || participants.length === 0) {
+      console.error("참가자를 찾을 수 없습니다:", firstGame.id);
+      return;
+    }
+
+    // 2. 각 멤버의 팀 확인
+    const memberTeams = new Map<string, "blue" | "red">();
+    participants.forEach((p) => {
+      memberTeams.set(p.member_id, p.team);
+    });
+
+    // 3. 각 멤버의 시리즈 연승/연패 업데이트
+    for (const [memberId, team] of memberTeams) {
+      const won = team === winnerTeam;
+
+      // 현재 연승/연패 조회
+      const { data: member } = await supabaseAdmin
+        .from("members")
+        .select("current_series_streak")
+        .eq("id", memberId)
+        .single();
+
+      if (!member) {
+        console.error("멤버를 찾을 수 없습니다:", memberId);
+        continue;
+      }
+
+      const currentStreak = member.current_series_streak || 0;
+
+      // 새 연승/연패 계산 (game streak과 동일한 로직)
+      let newStreak: number;
+      if (won) {
+        newStreak = currentStreak >= 0 ? currentStreak + 1 : 1;
+      } else {
+        newStreak = currentStreak <= 0 ? currentStreak - 1 : -1;
+      }
+
+      // 멤버 업데이트
+      await supabaseAdmin
+        .from("members")
+        .update({ current_series_streak: newStreak })
+        .eq("id", memberId);
+
+      // 참가 이력 기록
+      await supabaseAdmin.from("member_series_participation").upsert({
+        member_id: memberId,
+        match_series_id: seriesId,
+        won,
+        team,
+        updated_at: new Date().toISOString(),
+      });
+    }
+  } catch (error) {
+    console.error("시리즈 연승/연패 업데이트 실패:", error);
+  }
+}
+
 // 헬퍼 함수: 시리즈 상태 업데이트
 async function updateSeriesStatus(seriesId: string) {
   try {
@@ -167,6 +248,11 @@ async function updateSeriesStatus(seriesId: string) {
         winner_team: winnerTeam,
       })
       .eq("id", seriesId);
+
+    // 시리즈 완료 시 모든 참가자의 연승/연패 업데이트
+    if (seriesStatus === "completed" && winnerTeam) {
+      await updateMemberSeriesStreaks(seriesId, winnerTeam);
+    }
   } catch (error) {
     console.error("시리즈 상태 업데이트 실패:", error);
   }

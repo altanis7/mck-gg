@@ -93,6 +93,7 @@ export async function GET(
             currentElo: 1000,
             peakElo: 1000,
             currentStreak: 0,
+            currentSeriesStreak: 0,
             avgKda: 0,
             avgKills: 0,
             avgDeaths: 0,
@@ -138,6 +139,7 @@ export async function GET(
       currentElo: 1000, // 나중에 member_rating에서 가져올 예정
       peakElo: 1000,
       currentStreak: 0,
+      currentSeriesStreak: 0,
       avgKda,
       avgKills: totalGames > 0 ? totalKills / totalGames : 0,
       avgDeaths: totalGames > 0 ? totalDeaths / totalGames : 0,
@@ -327,12 +329,15 @@ export async function GET(
       .eq('member_id', id)
       .order('created_at', { ascending: true });
 
-    // 현재 ELO와 최고 ELO 업데이트
+    // 현재 ELO와 최고 ELO, 연승/연패 업데이트
     if (eloHistory && eloHistory.length > 0) {
       stats.currentElo = eloHistory[eloHistory.length - 1].elo_rating;
       stats.peakElo = Math.max(...eloHistory.map((r) => r.elo_rating));
       stats.currentStreak = eloHistory[eloHistory.length - 1].streak_after || 0;
     }
+
+    // 시리즈 연승/연패는 members 테이블에서 가져오기
+    stats.currentSeriesStreak = member.current_series_streak || 0;
 
     // 8. 티어 정보 계산 (순위 백분율 기반)
     const { data: rankingData } = await supabase
