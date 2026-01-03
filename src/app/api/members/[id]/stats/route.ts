@@ -136,7 +136,7 @@ export async function GET(
       wins,
       losses: totalGames - wins,
       winRate: totalGames > 0 ? (wins / totalGames) * 100 : 0,
-      currentElo: 1000, // 나중에 member_rating에서 가져올 예정
+      currentElo: 1000, // 나중에 member_ratings에서 가져올 예정
       peakElo: 1000,
       currentStreak: 0,
       currentSeriesStreak: 0,
@@ -301,7 +301,7 @@ export async function GET(
 
           // ELO 변화량 가져오기
           const { data: ratingData } = await supabase
-            .from('member_rating')
+            .from('member_ratings')
             .select('rating_change')
             .eq('game_id', game.id)
             .eq('member_id', id)
@@ -324,7 +324,7 @@ export async function GET(
 
     // 7. ELO 히스토리 조회
     const { data: eloHistory } = await supabase
-      .from('member_rating')
+      .from('member_ratings')
       .select('*')
       .eq('member_id', id)
       .order('created_at', { ascending: true });
