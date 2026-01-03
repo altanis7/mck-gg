@@ -176,7 +176,7 @@ export default function StatsPage() {
             className={`px-4 py-2 rounded font-semibold transition-colors ${
               sortBy === option.key
                 ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-200 hover:bg-gray-300"
+                : "bg-gray-700 text-white hover:bg-gray-600"
             }`}
           >
             {option.label}
@@ -223,9 +223,9 @@ export default function StatsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-slate-700">
                 {nonGuestStats.map((stat, index) => (
-                  <tr key={stat.memberId} className="hover:bg-gray-50">
+                  <tr key={stat.memberId} className="hover:bg-slate-700/50">
                     <td className="px-4 py-3 text-center">
                       <span
                         className={`font-bold ${
@@ -286,7 +286,7 @@ export default function StatsPage() {
           </div>
 
           {/* 모바일 카드 */}
-          <div className="md:hidden divide-y divide-gray-200">
+          <div className="md:hidden divide-y divide-slate-700">
             {nonGuestStats.map((stat, index) => (
               <div key={stat.memberId} className="p-4">
                 <div className="flex items-start gap-3 mb-3">
