@@ -144,6 +144,12 @@ export default function StatsPage() {
   // 최소 게임 수 필터 (3경기 이상)
   const filteredStats = sortedStats.filter((stat) => stat.gamesPlayed >= 3);
 
+  // 용병 제외 필터
+  const nonGuestStats = filteredStats.filter((stat) => {
+    const member = members.find((m) => m.id === stat.memberId);
+    return member && !member.is_guest;
+  });
+
   const sortOptions: { key: SortKey; label: string }[] = [
     { key: "winRate", label: "승률" },
     { key: "kda", label: "KDA" },
@@ -178,7 +184,7 @@ export default function StatsPage() {
         ))}
       </div>
 
-      {filteredStats.length === 0 ? (
+      {nonGuestStats.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-gray-500">
             통계를 표시할 수 있는 데이터가 부족합니다
@@ -218,7 +224,7 @@ export default function StatsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredStats.map((stat, index) => (
+                {nonGuestStats.map((stat, index) => (
                   <tr key={stat.memberId} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-center">
                       <span
@@ -281,7 +287,7 @@ export default function StatsPage() {
 
           {/* 모바일 카드 */}
           <div className="md:hidden divide-y divide-gray-200">
-            {filteredStats.map((stat, index) => (
+            {nonGuestStats.map((stat, index) => (
               <div key={stat.memberId} className="p-4">
                 <div className="flex items-start gap-3 mb-3">
                   <span

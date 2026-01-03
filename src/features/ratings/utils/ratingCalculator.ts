@@ -281,6 +281,7 @@ async function getCurrentRankings(): Promise<Map<string, number>> {
   const { data: rankings } = await supabaseAdmin
     .from('member_rankings')
     .select('id, ranking')
+    .eq('is_guest', false)
     .order('ranking', { ascending: true });
 
   const rankingMap = new Map<string, number>();

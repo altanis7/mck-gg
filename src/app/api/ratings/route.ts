@@ -8,6 +8,7 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from('member_rankings')
       .select('*')
+      .eq('is_guest', false)
       .order('ranking', { ascending: true });
 
     if (error) {
@@ -108,10 +109,16 @@ export async function GET() {
       })
     );
 
+    // 용병 제외 후 순위 재계산 (1부터 연속)
+    const rerankedData = enrichedRankings.map((ranking, index) => ({
+      ...ranking,
+      ranking: index + 1,
+    }));
+
     return NextResponse.json<RatingsResponse>({
       success: true,
-      data: enrichedRankings,
-      totalPlayers: rankings.length,
+      data: rerankedData,
+      totalPlayers: rerankedData.length,
     });
   } catch (error) {
     return NextResponse.json<RatingsResponse>(
