@@ -89,6 +89,7 @@ export interface PlayerOverallStats {
   currentElo: number;
   peakElo: number;
   currentStreak: number;
+  currentSeriesStreak: number; // 시리즈 기준 연승/연패
   avgKda: number;
   avgKills: number;
   avgDeaths: number;

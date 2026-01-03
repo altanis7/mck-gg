@@ -45,8 +45,10 @@ export interface MemberRanking {
   total_games: number;
   total_wins: number;
   current_streak: number;
+  current_series_streak: number; // 시리즈 기준 연승/연패
   ranking: number;
   win_rate: number;
+  is_guest?: boolean;
   topChampions?: ChampionStats[];
   lastGameDate?: string;
   avgKda?: number;
@@ -190,4 +192,19 @@ export interface GameParticipant {
   member_id: string;
   team: 'blue' | 'red';
   position: 'top' | 'jungle' | 'mid' | 'adc' | 'support';
+}
+
+// ============================================
+// 시리즈 연승/연패 시스템 타입
+// ============================================
+
+// 시리즈 참가 기록
+export interface SeriesParticipation {
+  id: string;
+  member_id: string;
+  match_series_id: string;
+  won: boolean | null; // NULL: 미완료, TRUE: 승리, FALSE: 패배
+  team: 'blue' | 'red';
+  created_at: string;
+  updated_at: string;
 }
