@@ -9,6 +9,7 @@ import { useCalculateRatings } from '@/features/ratings/hooks/useCalculateRating
 import { GameRegistrationForm } from '@/features/matches/components/GameRegistrationForm';
 import { DeleteGameModal } from '@/features/matches/components/DeleteGameModal';
 import { DeleteSeriesModal } from '@/features/matches/components/DeleteSeriesModal';
+import { CompleteSeriesModal } from '@/features/matches/components/CompleteSeriesModal';
 import { Button } from '@/shared/components/ui/Button';
 import { Loading } from '@/shared/components/ui/Loading';
 import { ErrorMessage } from '@/shared/components/ui/ErrorMessage';
@@ -27,6 +28,8 @@ export default function MatchDetailPage({
   const [isAddingGame, setIsAddingGame] = useState(false);
   const [gameToDelete, setGameToDelete] = useState<string | null>(null);
   const [showDeleteSeriesModal, setShowDeleteSeriesModal] = useState(false);
+  const [showCompleteSeriesModal, setShowCompleteSeriesModal] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const deleteGameMutation = useDeleteGame(id);
   const deleteSeriesMutation = useDeleteSeries();
   const calculateRatingsMutation = useCalculateRatings();
@@ -89,6 +92,58 @@ export default function MatchDetailPage({
     } catch (error) {
       console.error('시리즈 상태 변경 실패:', error);
       alert('시리즈 상태 변경에 실패했습니다.');
+    }
+  };
+
+  const handleCompleteSeries = async () => {
+    if (!seriesDetail) return;
+
+    // 검증
+    if (seriesDetail.games.length === 0) {
+      alert('최소 1개 이상의 게임이 필요합니다');
+      return;
+    }
+
+    const completedGames = seriesDetail.games.filter((g) => g.winning_team);
+    if (completedGames.length === 0) {
+      alert('완료된 게임이 없습니다');
+      return;
+    }
+
+    if (seriesDetail.blue_wins === seriesDetail.red_wins) {
+      alert('무승부는 불가능합니다 (승리 팀을 판단할 수 없음)');
+      return;
+    }
+
+    // 모달 표시
+    setShowCompleteSeriesModal(true);
+  };
+
+  const confirmCompleteSeries = async () => {
+    if (!seriesDetail) return;
+
+    setIsCompleting(true);
+    try {
+      const winnerTeam = seriesDetail.blue_wins > seriesDetail.red_wins ? 'blue' : 'red';
+
+      const response = await fetch(`/api/match-series/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          series_status: 'completed',
+          winner_team: winnerTeam,
+        }),
+      });
+
+      if (!response.ok) throw new Error('시리즈 완료 실패');
+
+      setShowCompleteSeriesModal(false);
+      refetch(); // 페이지 새로고침
+    } catch (error) {
+      console.error('시리즈 완료 실패:', error);
+      alert('시리즈 완료에 실패했습니다.');
+    } finally {
+      setIsCompleting(false);
     }
   };
 
@@ -168,6 +223,14 @@ export default function MatchDetailPage({
                 onClick={handleReopenSeries}
               >
                 진행중으로 변경
+              </Button>
+            )}
+            {seriesDetail.series_status === 'ongoing' && (
+              <Button
+                variant="primary"
+                onClick={handleCompleteSeries}
+              >
+                시리즈 완료
               </Button>
             )}
             <Button
@@ -267,6 +330,18 @@ export default function MatchDetailPage({
             위의 "게임 추가" 버튼을 클릭하여 첫 게임을 등록하세요
           </p>
         </div>
+      )}
+
+      {/* 시리즈 완료 확인 모달 */}
+      {showCompleteSeriesModal && (
+        <CompleteSeriesModal
+          isOpen={showCompleteSeriesModal}
+          onClose={() => setShowCompleteSeriesModal(false)}
+          onConfirm={confirmCompleteSeries}
+          blueWins={seriesDetail.blue_wins}
+          redWins={seriesDetail.red_wins}
+          isCompleting={isCompleting}
+        />
       )}
 
       {/* 시리즈 삭제 확인 모달 */}

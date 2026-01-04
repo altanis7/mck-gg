@@ -8,3 +8,4 @@ export default function ChampionsPage() {
   return <ChampionRankingsPage />;
 }
 
+

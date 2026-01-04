@@ -1,13 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useMatchSeries } from '@/features/matches/hooks/useMatchSeries';
 import { Button } from '@/shared/components/ui/Button';
 import { Loading } from '@/shared/components/ui/Loading';
 import { ErrorMessage } from '@/shared/components/ui/ErrorMessage';
+import { CompleteSeriesModal } from '@/features/matches/components/CompleteSeriesModal';
 
 export default function MatchesPage() {
-  const { data: series, isLoading, error } = useMatchSeries();
+  const { data: series, isLoading, error, refetch } = useMatchSeries();
+  const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
 
   if (isLoading) {
     return (
@@ -28,6 +33,54 @@ export default function MatchesPage() {
   if (!series) {
     return null;
   }
+
+  const handleCompleteSeries = (seriesId: string) => {
+    const selectedSeries = series.find(s => s.id === seriesId);
+    if (!selectedSeries) return;
+
+    // 검증
+    if (selectedSeries.blue_wins === selectedSeries.red_wins) {
+      alert('무승부는 불가능합니다 (승리 팀을 판단할 수 없음)');
+      return;
+    }
+
+    setSelectedSeriesId(seriesId);
+    setShowCompleteModal(true);
+  };
+
+  const confirmCompleteSeries = async () => {
+    if (!selectedSeriesId) return;
+
+    const selectedSeries = series.find(s => s.id === selectedSeriesId);
+    if (!selectedSeries) return;
+
+    setIsCompleting(true);
+    try {
+      const winnerTeam = selectedSeries.blue_wins > selectedSeries.red_wins ? 'blue' : 'red';
+
+      const response = await fetch(`/api/match-series/${selectedSeriesId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          series_status: 'completed',
+          winner_team: winnerTeam,
+        }),
+      });
+
+      if (!response.ok) throw new Error('시리즈 완료 실패');
+
+      setShowCompleteModal(false);
+      setSelectedSeriesId(null);
+      refetch(); // 목록 새로고침
+    } catch (error) {
+      console.error('시리즈 완료 실패:', error);
+      alert('시리즈 완료에 실패했습니다.');
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
+  const selectedSeries = selectedSeriesId ? series.find(s => s.id === selectedSeriesId) : null;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -63,44 +116,82 @@ export default function MatchesPage() {
                   : '완료';
 
             return (
-              <Link
+              <div
                 key={s.id}
-                href={`/admin/matches/${s.id}`}
-                className="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:bg-slate-750 transition-colors block"
+                className="bg-slate-800 border border-slate-700 rounded-lg p-6"
               >
                 <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm text-gray-400">
-                      {new Date(s.series_date).toLocaleString('ko-KR')}
-                    </p>
-                    <p className="text-lg font-semibold text-white mt-1">
-                      {seriesTypeLabel}
-                    </p>
-                    {s.series_status === 'completed' && (
-                      <p className="text-sm text-gray-300 mt-1">
-                        결과: {s.blue_wins} - {s.red_wins}
-                      </p>
-                    )}
-                  </div>
-                  <div
-                    className={`px-3 py-1 rounded text-sm font-semibold ${
-                      s.series_status === 'completed'
-                        ? 'bg-green-100 text-green-700'
-                        : s.series_status === 'ongoing'
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-gray-100 text-gray-700'
-                    }`}
+                  <Link
+                    href={`/admin/matches/${s.id}`}
+                    className="flex-1 hover:opacity-80 transition-opacity"
                   >
-                    {statusLabel}
+                    <div>
+                      <p className="text-sm text-gray-400">
+                        {new Date(s.series_date).toLocaleString('ko-KR')}
+                      </p>
+                      <p className="text-lg font-semibold text-white mt-1">
+                        {seriesTypeLabel}
+                      </p>
+                      {s.series_status === 'completed' && (
+                        <p className="text-sm text-gray-300 mt-1">
+                          결과: {s.blue_wins} - {s.red_wins}
+                        </p>
+                      )}
+                      {s.series_status === 'ongoing' && (
+                        <p className="text-sm text-gray-300 mt-1">
+                          현재: {s.blue_wins} - {s.red_wins}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`px-3 py-1 rounded text-sm font-semibold ${
+                        s.series_status === 'completed'
+                          ? 'bg-green-100 text-green-700'
+                          : s.series_status === 'ongoing'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {statusLabel}
+                    </div>
+                    {(s.series_status === 'ongoing' || s.series_status === 'scheduled') && (
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCompleteSeries(s.id);
+                        }}
+                      >
+                        완료
+                      </Button>
+                    )}
                   </div>
                 </div>
                 {s.notes && (
                   <p className="text-gray-400 mt-2 text-sm">{s.notes}</p>
                 )}
-              </Link>
+              </div>
             );
           })}
         </div>
+      )}
+
+      {/* 시리즈 완료 확인 모달 */}
+      {showCompleteModal && selectedSeries && (
+        <CompleteSeriesModal
+          isOpen={showCompleteModal}
+          onClose={() => {
+            setShowCompleteModal(false);
+            setSelectedSeriesId(null);
+          }}
+          onConfirm={confirmCompleteSeries}
+          blueWins={selectedSeries.blue_wins}
+          redWins={selectedSeries.red_wins}
+          isCompleting={isCompleting}
+        />
       )}
     </div>
   );
