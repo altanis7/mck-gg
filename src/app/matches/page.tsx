@@ -86,19 +86,11 @@ export default function MatchesPage() {
                       </span>
                     </div>
 
-                    {item.series_status === "completed" && item.winner_team && (
+                    {item.series_status === "completed" && (
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-300">결과:</span>
-                        <span
-                          className={`text-sm font-bold ${
-                            item.winner_team === "blue"
-                              ? "text-blue-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {item.blue_wins} - {item.red_wins}{" "}
-                          {item.winner_team === "blue" ? "블루팀" : "레드팀"}{" "}
-                          승리
+                        <span className="text-sm font-bold text-white">
+                          {item.blue_wins} - {item.red_wins}
                         </span>
                       </div>
                     )}

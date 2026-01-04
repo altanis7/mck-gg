@@ -210,55 +210,27 @@ async function updateSeriesStatus(seriesId: string) {
       .eq("game_status", "completed");
 
     if (!games || games.length === 0) {
-      // 게임이 없으면 scheduled로 초기화
+      // 게임이 없으면 통계 초기화 (상태는 수동 관리)
       await supabaseAdmin
         .from("match_series")
         .update({
           blue_wins: 0,
           red_wins: 0,
-          series_status: "scheduled",
-          winner_team: null,
         })
         .eq("id", seriesId);
       return;
     }
 
-    // 팀별 승수 계산
+    // 팀별 승수 계산 (통계 목적만)
     const blueWins = games.filter((g) => g.winning_team === "blue").length;
     const redWins = games.filter((g) => g.winning_team === "red").length;
 
-    // 시리즈 정보 조회
-    const { data: series } = await supabaseAdmin
-      .from("match_series")
-      .select("series_type")
-      .eq("id", seriesId)
-      .single();
-
-    if (!series) return;
-
-    // 승리 조건 확인
-    const winsNeeded =
-      series.series_type === "bo3" ? 2 : series.series_type === "bo5" ? 3 : 1;
-
-    let seriesStatus: "scheduled" | "ongoing" | "completed" = "ongoing";
-    let winnerTeam: "blue" | "red" | null = null;
-
-    if (blueWins >= winsNeeded) {
-      seriesStatus = "completed";
-      winnerTeam = "blue";
-    } else if (redWins >= winsNeeded) {
-      seriesStatus = "completed";
-      winnerTeam = "red";
-    }
-
-    // 시리즈 업데이트
+    // 시리즈 통계만 업데이트 (상태는 수동 관리)
     await supabaseAdmin
       .from("match_series")
       .update({
         blue_wins: blueWins,
         red_wins: redWins,
-        series_status: seriesStatus,
-        winner_team: winnerTeam,
       })
       .eq("id", seriesId);
   } catch (error) {

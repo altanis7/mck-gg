@@ -89,20 +89,11 @@ export default function MatchDetailPage({
             >
               {statusLabel}
             </div>
-            {seriesDetail.series_status === 'completed' &&
-              seriesDetail.winner_team && (
-                <div
-                  className={`px-4 py-2 rounded text-lg font-bold ${
-                    seriesDetail.winner_team === 'blue'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {seriesDetail.blue_wins} - {seriesDetail.red_wins}{' '}
-                  {seriesDetail.winner_team === 'blue' ? '블루팀' : '레드팀'}{' '}
-                  승리
-                </div>
-              )}
+            {seriesDetail.series_status === 'completed' && (
+              <div className="px-4 py-2 rounded text-lg font-bold bg-slate-700/50 text-white">
+                최종 스코어: {seriesDetail.blue_wins} - {seriesDetail.red_wins}
+              </div>
+            )}
           </div>
         </div>
         {seriesDetail.notes && (

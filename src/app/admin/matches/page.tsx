@@ -76,18 +76,9 @@ export default function MatchesPage() {
                     <p className="text-lg font-semibold text-white mt-1">
                       {seriesTypeLabel}
                     </p>
-                    {s.series_status === 'completed' && s.winner_team && (
+                    {s.series_status === 'completed' && (
                       <p className="text-sm text-gray-300 mt-1">
-                        {s.blue_wins} - {s.red_wins}
-                        <span
-                          className={`ml-2 ${
-                            s.winner_team === 'blue'
-                              ? 'text-blue-600'
-                              : 'text-red-600'
-                          }`}
-                        >
-                          ({s.winner_team === 'blue' ? '블루팀' : '레드팀'} 승리)
-                        </span>
+                        결과: {s.blue_wins} - {s.red_wins}
                       </p>
                     )}
                   </div>

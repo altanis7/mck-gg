@@ -68,6 +68,30 @@ export default function MatchDetailPage({
     }
   };
 
+  const handleReopenSeries = async () => {
+    if (!confirm('이 시리즈를 다시 진행중 상태로 변경하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/match-series/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          series_status: 'ongoing',
+          winner_team: null,
+        }),
+      });
+
+      if (!response.ok) throw new Error('시리즈 상태 변경 실패');
+
+      refetch(); // 페이지 새로고침
+    } catch (error) {
+      console.error('시리즈 상태 변경 실패:', error);
+      alert('시리즈 상태 변경에 실패했습니다.');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -133,20 +157,19 @@ export default function MatchDetailPage({
             >
               {statusLabel}
             </div>
-            {seriesDetail.series_status === 'completed' &&
-              seriesDetail.winner_team && (
-                <div
-                  className={`px-4 py-2 rounded text-lg font-bold ${
-                    seriesDetail.winner_team === 'blue'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {seriesDetail.blue_wins} - {seriesDetail.red_wins}{' '}
-                  {seriesDetail.winner_team === 'blue' ? '블루팀' : '레드팀'}{' '}
-                  승리
-                </div>
-              )}
+            {seriesDetail.series_status === 'completed' && (
+              <div className="px-4 py-2 rounded text-lg font-bold bg-slate-700/50 text-white">
+                최종 스코어: {seriesDetail.blue_wins} - {seriesDetail.red_wins}
+              </div>
+            )}
+            {seriesDetail.series_status === 'completed' && (
+              <Button
+                variant="outline"
+                onClick={handleReopenSeries}
+              >
+                진행중으로 변경
+              </Button>
+            )}
             <Button
               variant="danger"
               onClick={() => setShowDeleteSeriesModal(true)}
@@ -217,6 +240,7 @@ export default function MatchDetailPage({
               onDeleteClick={() => setGameToDelete(selectedGame.id)}
               onCalculateRatings={handleCalculateRatings}
               isCalculating={calculateRatingsMutation.isPending}
+              onRefetch={refetch}
             />
           )}
         </>
@@ -272,12 +296,42 @@ function GameResultsDisplay({
   onDeleteClick,
   onCalculateRatings,
   isCalculating,
+  onRefetch,
 }: {
   game: GameDetail;
   onDeleteClick: () => void;
   onCalculateRatings: () => void;
   isCalculating: boolean;
+  onRefetch: () => void;
 }) {
+  const handleChangeWinningTeam = async () => {
+    if (!game.winning_team) return;
+
+    const newWinner = game.winning_team === 'blue' ? 'red' : 'blue';
+    const confirmMsg = `승리팀을 ${game.winning_team === 'blue' ? '블루팀' : '레드팀'}에서 ${newWinner === 'blue' ? '블루팀' : '레드팀'}으로 변경하시겠습니까?`;
+
+    if (!confirm(confirmMsg)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/games/${game.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          winning_team: newWinner,
+        }),
+      });
+
+      if (!response.ok) throw new Error('승리팀 변경 실패');
+
+      onRefetch(); // 페이지 새로고침 (시리즈 통계도 자동 업데이트됨)
+    } catch (error) {
+      console.error('승리팀 변경 실패:', error);
+      alert('승리팀 변경에 실패했습니다.');
+    }
+  };
+
   const positionOrder: Record<string, number> = {
     top: 1,
     jungle: 2,
@@ -351,6 +405,15 @@ function GameResultsDisplay({
             </span>
           </div>
           <div className="flex gap-2">
+            {game.winning_team && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleChangeWinningTeam}
+              >
+                승리팀 변경
+              </Button>
+            )}
             {game.winning_team && (
               <Button
                 variant="primary"
