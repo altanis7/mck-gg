@@ -191,8 +191,8 @@ function calculateEloChange(
   // K-Factor (신규 유저는 더 큰 변동)
   const K = totalGames < 10 ? 40 : 32;
 
-  // 예상 승률 (팀 평균 기준)
-  const eloDiff = opponentAvgElo - teamAvgElo;
+  // 예상 승률 (개인 ELO 기준)
+  const eloDiff = opponentAvgElo - currentElo;
   const expectedScore = 1 / (1 + Math.pow(10, eloDiff / 400));
 
   // 기본 점수 변동
