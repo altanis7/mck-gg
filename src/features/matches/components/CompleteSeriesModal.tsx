@@ -7,8 +7,8 @@ interface CompleteSeriesModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  blueWins: number;
-  redWins: number;
+  teamAWins: number;
+  teamBWins: number;
   isCompleting: boolean;
 }
 
@@ -16,12 +16,12 @@ export function CompleteSeriesModal({
   isOpen,
   onClose,
   onConfirm,
-  blueWins,
-  redWins,
+  teamAWins,
+  teamBWins,
   isCompleting,
 }: CompleteSeriesModalProps) {
-  const winnerTeam = blueWins > redWins ? 'blue' : 'red';
-  const winnerLabel = winnerTeam === 'blue' ? '블루팀' : '레드팀';
+  const winnerTeam = teamAWins > teamBWins ? 'team_a' : 'team_b';
+  const winnerLabel = winnerTeam === 'team_a' ? 'Team A (첫 게임 블루팀)' : 'Team B (첫 게임 레드팀)';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="시리즈 완료">
@@ -33,8 +33,11 @@ export function CompleteSeriesModal({
             <p className="text-sm text-gray-700">
               현재 스코어:{' '}
               <span className="font-bold">
-                {blueWins} - {redWins}
+                Team A {teamAWins} - {teamBWins} Team B
               </span>
+            </p>
+            <p className="text-sm text-gray-600 text-xs">
+              (Team A = 첫 게임 블루팀 멤버, Team B = 첫 게임 레드팀 멤버)
             </p>
             <p className="text-sm text-gray-700">
               승리팀: <span className="font-bold">{winnerLabel}</span>

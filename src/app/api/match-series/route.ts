@@ -87,6 +87,8 @@ export async function POST(request: NextRequest) {
           series_status: 'scheduled', // 초기 상태는 scheduled
           blue_wins: 0,
           red_wins: 0,
+          team_a_wins: 0,
+          team_b_wins: 0,
           notes: body.notes || null,
         },
       ])

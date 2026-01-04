@@ -148,11 +148,11 @@ export async function PATCH(
     }
 
     // winner_team 검증 (제공된 경우)
-    if (body.winner_team && !['blue', 'red'].includes(body.winner_team)) {
+    if (body.winner_team && !['blue', 'red', 'team_a', 'team_b'].includes(body.winner_team)) {
       return NextResponse.json<MatchSeriesResponse>(
         {
           success: false,
-          error: 'winner_team은 blue 또는 red여야 합니다',
+          error: 'winner_team은 blue, red, team_a, team_b 중 하나여야 합니다',
         },
         { status: 400 }
       );
@@ -166,6 +166,8 @@ export async function PATCH(
     if (body.winner_team !== undefined) updateData.winner_team = body.winner_team;
     if (body.blue_wins !== undefined) updateData.blue_wins = body.blue_wins;
     if (body.red_wins !== undefined) updateData.red_wins = body.red_wins;
+    if (body.team_a_wins !== undefined) updateData.team_a_wins = body.team_a_wins;
+    if (body.team_b_wins !== undefined) updateData.team_b_wins = body.team_b_wins;
     if (body.screenshot_url !== undefined)
       updateData.screenshot_url = body.screenshot_url;
     if (body.notes !== undefined) updateData.notes = body.notes;

@@ -90,7 +90,7 @@ export default function MatchesPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-300">결과:</span>
                         <span className="text-sm font-bold text-white">
-                          {item.blue_wins} - {item.red_wins}
+                          {item.team_a_wins ?? 0} - {item.team_b_wins ?? 0}
                         </span>
                       </div>
                     )}

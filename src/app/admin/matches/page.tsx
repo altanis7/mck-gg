@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useMatchSeries } from '@/features/matches/hooks/useMatchSeries';
-import { Button } from '@/shared/components/ui/Button';
-import { Loading } from '@/shared/components/ui/Loading';
-import { ErrorMessage } from '@/shared/components/ui/ErrorMessage';
-import { CompleteSeriesModal } from '@/features/matches/components/CompleteSeriesModal';
+import { useState } from "react";
+import Link from "next/link";
+import { useMatchSeries } from "@/features/matches/hooks/useMatchSeries";
+import { Button } from "@/shared/components/ui/Button";
+import { Loading } from "@/shared/components/ui/Loading";
+import { ErrorMessage } from "@/shared/components/ui/ErrorMessage";
+import { CompleteSeriesModal } from "@/features/matches/components/CompleteSeriesModal";
 
 export default function MatchesPage() {
   const { data: series, isLoading, error, refetch } = useMatchSeries();
@@ -35,12 +35,14 @@ export default function MatchesPage() {
   }
 
   const handleCompleteSeries = (seriesId: string) => {
-    const selectedSeries = series.find(s => s.id === seriesId);
+    const selectedSeries = series.find((s) => s.id === seriesId);
     if (!selectedSeries) return;
 
-    // 검증
-    if (selectedSeries.blue_wins === selectedSeries.red_wins) {
-      alert('무승부는 불가능합니다 (승리 팀을 판단할 수 없음)');
+    // 검증 (team_a_wins / team_b_wins 기반)
+    const teamAWins = selectedSeries.team_a_wins ?? 0;
+    const teamBWins = selectedSeries.team_b_wins ?? 0;
+    if (teamAWins === teamBWins) {
+      alert("무승부는 불가능합니다 (승리 팀을 판단할 수 없음)");
       return;
     }
 
@@ -51,36 +53,41 @@ export default function MatchesPage() {
   const confirmCompleteSeries = async () => {
     if (!selectedSeriesId) return;
 
-    const selectedSeries = series.find(s => s.id === selectedSeriesId);
+    const selectedSeries = series.find((s) => s.id === selectedSeriesId);
     if (!selectedSeries) return;
 
     setIsCompleting(true);
     try {
-      const winnerTeam = selectedSeries.blue_wins > selectedSeries.red_wins ? 'blue' : 'red';
+      // team_a/team_b 기반으로 승자 결정
+      const teamAWins = selectedSeries.team_a_wins ?? 0;
+      const teamBWins = selectedSeries.team_b_wins ?? 0;
+      const winnerTeam = teamAWins > teamBWins ? "team_a" : "team_b";
 
       const response = await fetch(`/api/match-series/${selectedSeriesId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          series_status: 'completed',
+          series_status: "completed",
           winner_team: winnerTeam,
         }),
       });
 
-      if (!response.ok) throw new Error('시리즈 완료 실패');
+      if (!response.ok) throw new Error("시리즈 완료 실패");
 
       setShowCompleteModal(false);
       setSelectedSeriesId(null);
       refetch(); // 목록 새로고침
     } catch (error) {
-      console.error('시리즈 완료 실패:', error);
-      alert('시리즈 완료에 실패했습니다.');
+      console.error("시리즈 완료 실패:", error);
+      alert("시리즈 완료에 실패했습니다.");
     } finally {
       setIsCompleting(false);
     }
   };
 
-  const selectedSeries = selectedSeriesId ? series.find(s => s.id === selectedSeriesId) : null;
+  const selectedSeries = selectedSeriesId
+    ? series.find((s) => s.id === selectedSeriesId)
+    : null;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -102,18 +109,18 @@ export default function MatchesPage() {
         <div className="grid gap-4">
           {series.map((s) => {
             const seriesTypeLabel =
-              s.series_type === 'bo1'
-                ? '단판'
-                : s.series_type === 'bo3'
-                  ? '3판 2선승'
-                  : '5판 3선승';
+              s.series_type === "bo1"
+                ? "단판"
+                : s.series_type === "bo3"
+                ? "3판 2선승"
+                : "5판 3선승";
 
             const statusLabel =
-              s.series_status === 'scheduled'
-                ? '예정'
-                : s.series_status === 'ongoing'
-                  ? '진행중'
-                  : '완료';
+              s.series_status === "scheduled"
+                ? "예정"
+                : s.series_status === "ongoing"
+                ? "진행중"
+                : "완료";
 
             return (
               <div
@@ -127,19 +134,19 @@ export default function MatchesPage() {
                   >
                     <div>
                       <p className="text-sm text-gray-400">
-                        {new Date(s.series_date).toLocaleString('ko-KR')}
+                        {new Date(s.series_date).toLocaleString("ko-KR")}
                       </p>
                       <p className="text-lg font-semibold text-white mt-1">
                         {seriesTypeLabel}
                       </p>
-                      {s.series_status === 'completed' && (
+                      {s.series_status === "completed" && (
                         <p className="text-sm text-gray-300 mt-1">
-                          결과: {s.blue_wins} - {s.red_wins}
+                          결과: {s.team_a_wins ?? 0} - {s.team_b_wins ?? 0}
                         </p>
                       )}
-                      {s.series_status === 'ongoing' && (
+                      {s.series_status === "ongoing" && (
                         <p className="text-sm text-gray-300 mt-1">
-                          현재: {s.blue_wins} - {s.red_wins}
+                          현재: {s.team_a_wins ?? 0} - {s.team_b_wins ?? 0}
                         </p>
                       )}
                     </div>
@@ -147,16 +154,17 @@ export default function MatchesPage() {
                   <div className="flex items-center gap-2">
                     <div
                       className={`px-3 py-1 rounded text-sm font-semibold ${
-                        s.series_status === 'completed'
-                          ? 'bg-green-100 text-green-700'
-                          : s.series_status === 'ongoing'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-gray-100 text-gray-700'
+                        s.series_status === "completed"
+                          ? "bg-green-100 text-green-700"
+                          : s.series_status === "ongoing"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-gray-100 text-gray-700"
                       }`}
                     >
                       {statusLabel}
                     </div>
-                    {(s.series_status === 'ongoing' || s.series_status === 'scheduled') && (
+                    {(s.series_status === "ongoing" ||
+                      s.series_status === "scheduled") && (
                       <Button
                         size="sm"
                         variant="primary"
@@ -188,8 +196,8 @@ export default function MatchesPage() {
             setSelectedSeriesId(null);
           }}
           onConfirm={confirmCompleteSeries}
-          blueWins={selectedSeries.blue_wins}
-          redWins={selectedSeries.red_wins}
+          teamAWins={selectedSeries.team_a_wins ?? 0}
+          teamBWins={selectedSeries.team_b_wins ?? 0}
           isCompleting={isCompleting}
         />
       )}

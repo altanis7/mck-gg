@@ -199,38 +199,87 @@ export async function DELETE(
   }
 }
 
-// 헬퍼 함수: 시리즈 상태 업데이트
+// 헬퍼 함수: 시리즈 상태 업데이트 (팀 A/B 기반)
 async function updateSeriesStatus(seriesId: string) {
   try {
-    // 해당 시리즈의 모든 완료된 게임 조회
+    // 1. 해당 시리즈의 모든 게임 조회 (게임 번호 순)
     const { data: games } = await supabaseAdmin
       .from("games")
-      .select("winning_team")
+      .select("id, game_number, winning_team, game_status")
       .eq("match_series_id", seriesId)
-      .eq("game_status", "completed");
+      .order("game_number", { ascending: true });
 
     if (!games || games.length === 0) {
-      // 게임이 없으면 통계 초기화 (상태는 수동 관리)
+      // 게임이 없으면 통계 초기화
       await supabaseAdmin
         .from("match_series")
         .update({
           blue_wins: 0,
           red_wins: 0,
+          team_a_wins: 0,
+          team_b_wins: 0,
         })
         .eq("id", seriesId);
       return;
     }
 
-    // 팀별 승수 계산 (통계 목적만)
-    const blueWins = games.filter((g) => g.winning_team === "blue").length;
-    const redWins = games.filter((g) => g.winning_team === "red").length;
+    // 2. 첫 번째 게임에서 블루팀 멤버 목록 가져오기 (= team_a)
+    const firstGame = games[0];
+    const { data: firstGameResults } = await supabaseAdmin
+      .from("game_results")
+      .select("member_id, team")
+      .eq("game_id", firstGame.id);
 
-    // 시리즈 통계만 업데이트 (상태는 수동 관리)
+    const teamAMembers = new Set<string>();
+    if (firstGameResults) {
+      firstGameResults
+        .filter((r) => r.team === "blue")
+        .forEach((r) => teamAMembers.add(r.member_id));
+    }
+
+    // 3. 각 완료된 게임별로 승리 팀 계산
+    let blueWins = 0;
+    let redWins = 0;
+    let teamAWins = 0;
+    let teamBWins = 0;
+
+    for (const game of games) {
+      if (game.game_status !== "completed" || !game.winning_team) continue;
+
+      // 기존 blue/red 통계 (하위 호환성)
+      if (game.winning_team === "blue") blueWins++;
+      else if (game.winning_team === "red") redWins++;
+
+      // 팀 A/B 승리 계산: 해당 게임에서 승리 진영에 team_a 멤버가 있는지 확인
+      const { data: gameResults } = await supabaseAdmin
+        .from("game_results")
+        .select("member_id, team")
+        .eq("game_id", game.id);
+
+      if (gameResults && gameResults.length > 0) {
+        // 승리 진영의 멤버들
+        const winningTeamMembers = gameResults
+          .filter((r) => r.team === game.winning_team)
+          .map((r) => r.member_id);
+
+        // 승리 진영에 team_a 멤버가 있으면 team_a 승리
+        const teamAWon = winningTeamMembers.some((m) => teamAMembers.has(m));
+        if (teamAWon) {
+          teamAWins++;
+        } else {
+          teamBWins++;
+        }
+      }
+    }
+
+    // 4. 시리즈 통계 업데이트
     await supabaseAdmin
       .from("match_series")
       .update({
         blue_wins: blueWins,
         red_wins: redWins,
+        team_a_wins: teamAWins,
+        team_b_wins: teamBWins,
       })
       .eq("id", seriesId);
   } catch (error) {

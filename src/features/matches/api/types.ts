@@ -8,9 +8,11 @@ export interface MatchSeries {
   series_date: string;
   series_type: 'bo1' | 'bo3' | 'bo5';
   series_status: 'scheduled' | 'ongoing' | 'completed';
-  winner_team?: 'blue' | 'red';
+  winner_team?: 'blue' | 'red' | 'team_a' | 'team_b';
   blue_wins: number;
   red_wins: number;
+  team_a_wins: number;  // 첫 게임 블루팀 기준
+  team_b_wins: number;  // 첫 게임 레드팀 기준
   screenshot_url?: string;
   notes?: string;
   created_at: string;
@@ -138,9 +140,11 @@ export interface CreateMatchSeriesDto {
 export interface UpdateMatchSeriesDto {
   series_date?: string;
   series_status?: 'scheduled' | 'ongoing' | 'completed';
-  winner_team?: 'blue' | 'red';
+  winner_team?: 'blue' | 'red' | 'team_a' | 'team_b';
   blue_wins?: number;
   red_wins?: number;
+  team_a_wins?: number;
+  team_b_wins?: number;
   screenshot_url?: string;
   notes?: string;
 }

@@ -91,7 +91,10 @@ export default function MatchDetailPage({
             </div>
             {seriesDetail.series_status === 'completed' && (
               <div className="px-4 py-2 rounded text-lg font-bold bg-slate-700/50 text-white">
-                최종 스코어: {seriesDetail.blue_wins} - {seriesDetail.red_wins}
+                최종 스코어: {seriesDetail.team_a_wins ?? 0} - {seriesDetail.team_b_wins ?? 0}
+                <span className="ml-2 text-sm font-normal text-gray-400">
+                  ({seriesDetail.winner_team === 'team_a' ? 'Team A' : 'Team B'} 승)
+                </span>
               </div>
             )}
           </div>

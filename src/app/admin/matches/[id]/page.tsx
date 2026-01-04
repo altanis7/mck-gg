@@ -110,7 +110,11 @@ export default function MatchDetailPage({
       return;
     }
 
-    if (seriesDetail.blue_wins === seriesDetail.red_wins) {
+    // team_a_wins / team_b_wins 기반으로 검증
+    const teamAWins = seriesDetail.team_a_wins ?? 0;
+    const teamBWins = seriesDetail.team_b_wins ?? 0;
+
+    if (teamAWins === teamBWins) {
       alert('무승부는 불가능합니다 (승리 팀을 판단할 수 없음)');
       return;
     }
@@ -124,7 +128,10 @@ export default function MatchDetailPage({
 
     setIsCompleting(true);
     try {
-      const winnerTeam = seriesDetail.blue_wins > seriesDetail.red_wins ? 'blue' : 'red';
+      // team_a/team_b 기반으로 승자 결정
+      const teamAWins = seriesDetail.team_a_wins ?? 0;
+      const teamBWins = seriesDetail.team_b_wins ?? 0;
+      const winnerTeam = teamAWins > teamBWins ? 'team_a' : 'team_b';
 
       const response = await fetch(`/api/match-series/${id}`, {
         method: 'PATCH',
@@ -214,7 +221,10 @@ export default function MatchDetailPage({
             </div>
             {seriesDetail.series_status === 'completed' && (
               <div className="px-4 py-2 rounded text-lg font-bold bg-slate-700/50 text-white">
-                최종 스코어: {seriesDetail.blue_wins} - {seriesDetail.red_wins}
+                최종 스코어: {seriesDetail.team_a_wins ?? 0} - {seriesDetail.team_b_wins ?? 0}
+                <span className="ml-2 text-sm font-normal text-gray-400">
+                  ({seriesDetail.winner_team === 'team_a' ? 'Team A' : 'Team B'} 승)
+                </span>
               </div>
             )}
             {seriesDetail.series_status === 'completed' && (
@@ -338,8 +348,8 @@ export default function MatchDetailPage({
           isOpen={showCompleteSeriesModal}
           onClose={() => setShowCompleteSeriesModal(false)}
           onConfirm={confirmCompleteSeries}
-          blueWins={seriesDetail.blue_wins}
-          redWins={seriesDetail.red_wins}
+          teamAWins={seriesDetail.team_a_wins ?? 0}
+          teamBWins={seriesDetail.team_b_wins ?? 0}
           isCompleting={isCompleting}
         />
       )}
