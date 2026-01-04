@@ -44,10 +44,12 @@ export interface MemberRanking {
   peak_elo: number;
   total_games: number;
   total_wins: number;
+  total_series: number; // 전체 시리즈 수
+  total_series_wins: number; // 시리즈 승리 수
   current_streak: number;
   current_series_streak: number; // 시리즈 기준 연승/연패
   ranking: number;
-  win_rate: number;
+  win_rate: number; // 시리즈 기반 승률
   is_guest?: boolean;
   topChampions?: ChampionStats[];
   lastGameDate?: string;
@@ -184,6 +186,8 @@ export interface MemberEloInfo {
   peak_elo: number | null;
   total_games: number | null;
   total_wins: number | null;
+  total_series: number | null; // 전체 시리즈 수
+  total_series_wins: number | null; // 시리즈 승리 수
   current_streak: number | null;
 }
 

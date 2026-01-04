@@ -66,7 +66,7 @@ export async function calculateGameRatings(
   const memberIds = participants.map((p) => p.member_id);
   const { data: members, error: membersError } = await supabaseAdmin
     .from('members')
-    .select('id, name, summoner_name, solo_tier, current_elo, peak_elo, total_games, total_wins, current_streak')
+    .select('id, name, summoner_name, solo_tier, current_elo, peak_elo, total_games, total_wins, total_series, total_series_wins, current_streak')
     .in('id', memberIds);
 
   if (membersError || !members) {

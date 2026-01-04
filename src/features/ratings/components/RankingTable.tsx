@@ -178,7 +178,7 @@ export function RankingTable({ rankings }: RankingTableProps) {
                       {member.win_rate.toFixed(2)}%
                     </span>
                     <span className="text-xs text-gray-400">
-                      {member.total_wins}승 {member.total_games - member.total_wins}패
+                      {member.total_series_wins}승 {member.total_series - member.total_series_wins}패
                     </span>
                   </div>
                 </td>
@@ -271,7 +271,7 @@ export function RankingTable({ rankings }: RankingTableProps) {
                   </span>
                   <span>•</span>
                   <span>
-                    {member.total_wins}승 {member.total_games - member.total_wins}패
+                    {member.total_series_wins}승 {member.total_series - member.total_series_wins}패
                   </span>
                 </div>
               </div>
