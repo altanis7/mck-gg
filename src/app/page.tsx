@@ -97,7 +97,7 @@ function TopThreeCard({
               {member.win_rate.toFixed(1)}%
             </div>
             <div className="text-sm text-gray-400">
-              {member.total_wins}승 {member.total_games - member.total_wins}패
+              {member.total_series_wins}승 {member.total_series - member.total_series_wins}패
             </div>
           </div>
 
